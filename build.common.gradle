@@ -93,11 +93,9 @@ android {
         jni.srcDirs = []
         jniLibs.srcDir rootProject.file('libs')
     }
-}
 
-repositories {
-    flatDir {
-        dirs rootProject.file('libs')
+    lintOptions {
+        abortOnError false
     }
 }
 

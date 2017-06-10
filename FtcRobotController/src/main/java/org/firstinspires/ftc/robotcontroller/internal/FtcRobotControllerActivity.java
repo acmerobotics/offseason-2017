@@ -54,6 +54,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.google.blocks.ftcrobotcontroller.BlocksActivity;
 import com.google.blocks.ftcrobotcontroller.ProgrammingModeActivity;
 import com.google.blocks.ftcrobotcontroller.ProgrammingModeControllerImpl;
@@ -137,6 +138,8 @@ public class FtcRobotControllerActivity extends Activity {
 
   protected FtcEventLoop eventLoop;
   protected Queue<UsbDevice> receivedUsbAttachmentNotifications;
+
+  private RobotDashboard dashboard;
 
   protected class RobotRestarter implements Restarter {
 
@@ -283,6 +286,9 @@ public class FtcRobotControllerActivity extends Activity {
     startWatchdogService();
     bindToService();
     logPackageVersions();
+
+    // TODO dashboard
+    dashboard = new RobotDashboard(this);
   }
 
   protected UpdateUI createUpdateUI() {
@@ -359,6 +365,9 @@ public class FtcRobotControllerActivity extends Activity {
     stopWatchdogService();
     wifiLock.release();
     RobotLog.cancelWriteLogcatToDisk();
+
+    // TODO dashboard
+    dashboard.stop();
   }
 
   protected void bindToService() {
