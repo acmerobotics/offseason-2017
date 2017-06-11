@@ -1,12 +1,18 @@
 package com.acmerobotics.library.dashboard;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Path;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.acmerobotics.library.dashboard.option.DoubleOption;
+import com.acmerobotics.library.dashboard.option.EnumOption;
+import com.acmerobotics.library.dashboard.option.IntegerOption;
+import com.acmerobotics.library.dashboard.option.Option;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -16,21 +22,25 @@ import static com.acmerobotics.library.configuration.OpModeConfiguration.*;
 public class RobotDashboard {
 	
 	private Map<String, String> telemetry;
-	private PrefConfig config;
+	private SharedPreferences prefs;
+	private List<Option<?>> config;
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
 	
 	public RobotDashboard(Context ctx) {
+		prefs = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
 		telemetry = new HashMap<>();
-		config = new PrefConfig(ctx, PREFS_NAME);
-        config.addOption(PREF_ALLIANCE_COLOR, PrefConfig.Type.ENUM, AllianceColor.class);
-        config.addOption(PREF_PARK_DEST, PrefConfig.Type.ENUM, ParkDest.class);
-        config.addOption(PREF_DELAY, PrefConfig.Type.INT);
-        config.addOption(PREF_NUM_BALLS, PrefConfig.Type.INT);
-        config.addOption(PREF_MATCH_TYPE, PrefConfig.Type.ENUM, MatchType.class);
-        config.addOption(PREF_MATCH_NUMBER, PrefConfig.Type.INT);
-        config.addOption(PREF_LAST_HEADING, PrefConfig.Type.INT);
+
+		config = new ArrayList<>();
+		config.add(new EnumOption(PREF_ALLIANCE_COLOR, AllianceColor.class, prefs));
+		config.add(new EnumOption(PREF_PARK_DEST, ParkDest.class, prefs));
+		config.add(new IntegerOption(PREF_DELAY, prefs));
+		config.add(new IntegerOption(PREF_NUM_BALLS, prefs));
+		config.add(new EnumOption(PREF_MATCH_TYPE, MatchType.class, prefs));
+		config.add(new IntegerOption(PREF_MATCH_NUMBER, prefs));
+		config.add(new DoubleOption(PREF_LAST_HEADING, prefs));
+
 		server = new RobotWebSocketServer(this);
 		try {
 			server.start();
@@ -49,6 +59,14 @@ public class RobotDashboard {
 		}
 		return arr;
 	}
+
+	private JsonArray getConfigAsJson() {
+		JsonArray arr = new JsonArray();
+		for (Option o : config) {
+			arr.add(o.getAsJson());
+		}
+		return arr;
+	}
 	
 	public void updateTelemetry() {
 		JsonArray arr = getTelemetryAsJson();
@@ -58,7 +76,7 @@ public class RobotDashboard {
 	}
 	
 	public void updateConfig() {
-		JsonArray arr = config.getAsJson();
+		JsonArray arr = getConfigAsJson();
 		JsonObject data = new JsonObject();
 		data.add("config", arr);
 		sendAll(getMessage("update", data).toString());
@@ -114,7 +132,9 @@ public class RobotDashboard {
 			JsonObject data = msg.get("data").getAsJsonObject();
 			if (data.has("config")) {
 				JsonArray arr = data.get("config").getAsJsonArray();
-                config.updateFromJson(arr);
+				for (int i = 0; i < arr.size(); i++) {
+				    config.get(i).updateFromJson(arr.get(i).getAsJsonObject());
+                }
 			}
 		} else {
 			Log.i("Dashboard", String.format("unknown message recv'd: '%s'", type));

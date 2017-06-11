@@ -115,10 +115,8 @@ class Dashboard extends Component {
       this.setState({
         isConnected: false
       });
-      console.log("socket closed");
 
       setTimeout(() => {
-        console.log("attempting to reconnect");
         this.connect();
       }, 3000);
     };

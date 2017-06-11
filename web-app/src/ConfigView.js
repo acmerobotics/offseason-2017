@@ -42,7 +42,7 @@ class ConfigView extends Component {
       }
       return (
         <tr>
-          <td>{option.name}</td>
+          <td>{option.key}</td>
           <td>{input}</td>
         </tr>
       );
