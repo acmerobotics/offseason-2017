@@ -8,8 +8,12 @@ class TelemetryView extends Component {
         <td>{item[1]}</td>
       </tr>
     ));
+    const style = {
+      gridRow: 1,
+      gridColumn: 3
+    };
     return (
-      <div className="tile" id="telemetry">
+      <div className="tile" style={style}>
         <div className="heading">
           <h2>Telemetry</h2>
           <div className="iconGroup">

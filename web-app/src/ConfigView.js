@@ -47,8 +47,12 @@ class ConfigView extends Component {
         </tr>
       );
     });
+    const style = {
+      gridRow: 1,
+      gridColumn: 2
+    };
     return (
-      <div className="tile" id="config">
+      <div className="tile" style={style}>
         <div className="heading">
           <h2>Configuration</h2>
           <div className="iconGroup">

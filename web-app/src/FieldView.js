@@ -11,14 +11,14 @@ class FieldView extends Component {
   }
 
   componentDidMount() {
-    this.updateCanvas();
+    this.renderCanvas();
   }
 
   componentDidUpdate() {
-    this.updateCanvas();
+    this.renderCanvas();
   }
 
-  updateCanvas() {
+  renderCanvas() {
     const ctx = this.refs.canvas.getContext("2d");
     ctx.fillStyle = "rgb(200, 200, 200)";
     ctx.fillRect(0, 0, 500, 500);

@@ -20,6 +20,17 @@ import com.google.gson.JsonPrimitive;
 import static com.acmerobotics.library.configuration.OpModeConfiguration.*;
 
 public class RobotDashboard {
+
+	private static RobotDashboard dashboard;
+
+	public static RobotDashboard open(Context ctx) {
+		dashboard = new RobotDashboard(ctx);
+		return dashboard;
+	}
+
+	public static RobotDashboard getInstance() {
+		return dashboard;
+	}
 	
 	private Map<String, String> telemetry;
 	private SharedPreferences prefs;
@@ -27,7 +38,7 @@ public class RobotDashboard {
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
 	
-	public RobotDashboard(Context ctx) {
+	private RobotDashboard(Context ctx) {
 		prefs = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
 		telemetry = new HashMap<>();
@@ -144,6 +155,7 @@ public class RobotDashboard {
 	
 	public void stop() {
 		server.stop();
+		dashboard = null;
 	}
 	
 }

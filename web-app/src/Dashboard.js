@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import FieldView from './FieldView';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
+import GraphView from './GraphView';
 
 class Dashboard extends Component {
   constructor(props) {
@@ -60,7 +61,8 @@ class Dashboard extends Component {
         </div>
       </header>
       <div id="grid">
-        <FieldView telemetry={this.state.telemetry} />
+        {/* <FieldView telemetry={this.state.telemetry} /> */}
+        <GraphView telemetry={this.state.telemetry} />
         <ConfigView config={this.state.config} onChange={this.handleConfigChange} onSave={this.handleConfigSave} onRefresh={this.handleConfigRefresh} />
         <TelemetryView telemetry={this.state.telemetry} />
       </div>

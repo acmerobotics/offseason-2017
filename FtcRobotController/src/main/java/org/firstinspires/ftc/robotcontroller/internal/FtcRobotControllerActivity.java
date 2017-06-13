@@ -288,7 +288,7 @@ public class FtcRobotControllerActivity extends Activity {
     logPackageVersions();
 
     // TODO dashboard
-    dashboard = new RobotDashboard(this);
+    dashboard = RobotDashboard.open(this);
   }
 
   protected UpdateUI createUpdateUI() {
