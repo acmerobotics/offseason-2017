@@ -21,7 +21,7 @@ public class BasicOpMode extends OpMode implements SensorEventListener {
     private Sensor sensor;
 
     private long lastTime;
-    private float lastReading;
+    private float[] lastReading;
 
     @Override
     public void init() {
@@ -34,7 +34,9 @@ public class BasicOpMode extends OpMode implements SensorEventListener {
     @Override
     public void loop() {
         dashboard.addTelemetry("time", lastTime);
-        dashboard.addTelemetry("x", lastReading);
+        dashboard.addTelemetry("first", lastReading[0]);
+        dashboard.addTelemetry("second", lastReading[1]);
+        dashboard.addTelemetry("third", lastReading[2]);
         dashboard.updateTelemetry();
         try {
             Thread.sleep(50);
@@ -46,7 +48,7 @@ public class BasicOpMode extends OpMode implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         lastTime = System.currentTimeMillis();
-        lastReading = sensorEvent.values[0];
+        lastReading = sensorEvent.values;
     }
 
     @Override

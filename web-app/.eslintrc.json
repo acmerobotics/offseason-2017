@@ -1,0 +1,39 @@
+{
+    "env": {
+      "browser": true
+    },
+    "extends": "airbnb",
+    "plugins": [
+        "react",
+        "jsx-a11y",
+        "import"
+    ],
+    "rules": {
+      "indent": [
+        "error",
+        2
+      ],
+      "linebreak-style": [
+        "error",
+        "windows"
+      ],
+      "no-mixed-operators": [
+        "off"
+      ],
+      "no-param-reassign": [
+        "off"
+      ],
+      "react/prop-types": [
+        "off"
+      ],
+      "react/jsx-closing-bracket-location": [
+        "off"
+      ],
+      "react/no-array-index-key": [
+        "off"
+      ],
+      "jsx-a11y/no-static-element-interactions": [
+        "off"
+      ]
+    }
+}
