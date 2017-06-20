@@ -3,24 +3,16 @@ import Graph from './Graph';
 
 class GraphView extends Component {
   componentDidMount() {
-    this.graph = new Graph(this.canvas, {
-      color: [
-        'rgb(48, 129, 253)',
-        '#e53935',
-        '#1de9b6',
-      ],
-    });
+    this.graph = new Graph(this.canvas);
     this.renderGraph();
   }
 
   componentDidUpdate() {
     if (this.props.keys.length > 0) {
       const data = [];
-      this.props.telemetry.forEach((entry) => {
-        if (this.props.keys.indexOf(entry[0]) !== -1) {
-          data.push(parseFloat(entry[1]));
-        }
-      });
+      this.props.telemetry
+        .filter(entry => this.props.keys.indexOf(entry[0]) !== -1)
+        .forEach(entry => data.push(parseFloat(entry[1])));
       this.graph.addData(parseInt(this.props.telemetry[0][1], 10), data);
     }
   }

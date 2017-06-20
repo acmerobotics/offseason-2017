@@ -1,5 +1,11 @@
 const DEFAULT_OPTIONS = {
-  color: ['rgb(255, 0, 0)'],
+  color: [
+    '#2979ff',
+    '#dd2c00',
+    '#4caf50',
+    '#7c4dff',
+    '#ffa000',
+  ],
   lineWidth: 2,
   durationMs: 25000,
   padding: 20,
