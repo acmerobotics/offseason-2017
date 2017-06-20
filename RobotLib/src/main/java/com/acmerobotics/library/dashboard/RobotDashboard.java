@@ -17,6 +17,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
+import org.json.JSONArray;
+
 import static com.acmerobotics.library.configuration.OpModeConfiguration.*;
 
 public class RobotDashboard {
@@ -37,7 +39,7 @@ public class RobotDashboard {
 	private SharedPreferences.Editor editor;
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
-    private List<Class<?>> configClasses;
+    private List<OptionGroup> optionGroups;
 	private Gson gson;
 	
 	private RobotDashboard(Context ctx) {
@@ -45,11 +47,10 @@ public class RobotDashboard {
 		sockets = new ArrayList<>();
 		telemetry = new HashMap<>();
 		gson = new Gson();
-		editor = prefs.edit();
 
-        configClasses = new ArrayList<>();
-        configClasses.add(Config.class);
-        configClasses.add(Constants.class);
+		optionGroups = new ArrayList<>();
+		optionGroups.add(new OptionGroup(Config.class, prefs));
+		optionGroups.add(new OptionGroup(Constants.class, prefs));
 
 		server = new RobotWebSocketServer(this);
 		try {
@@ -59,103 +60,21 @@ public class RobotDashboard {
 		}
 	}
 
-	public static JsonArray getConfigJson(Class<?> klass) {
-	    try {
-            JsonArray arr = new JsonArray();
-            for (Field f : klass.getFields()) {
-                JsonObject option = new JsonObject();
-                option.add("name", new JsonPrimitive(f.getName()));
-                Class<?> type = f.getType();
-                switch (type.getSimpleName()) {
-                    case "boolean":
-                        option.add("type", new JsonPrimitive("boolean"));
-                        option.add("value", new JsonPrimitive(f.getBoolean(null)));
-                        break;
-                    case "int":
-                        option.add("type", new JsonPrimitive("int"));
-                        option.add("value", new JsonPrimitive(f.getInt(null)));
-                        break;
-                    case "double":
-                        option.add("type", new JsonPrimitive("double"));
-                        option.add("value", new JsonPrimitive(f.getDouble(null)));
-                        break;
-                    case "String":
-                        option.add("type", new JsonPrimitive("string"));
-                        option.add("value", new JsonPrimitive(f.get(null).toString()));
-                        break;
-                    default:
-                        if (type.getSuperclass().equals(Enum.class)) {
-                            option.add("type", new JsonPrimitive("enum"));
-                            JsonArray values = new JsonArray();
-                            List<?> enumConstants = Arrays.asList(type.getEnumConstants());
-                            for (Object constant : enumConstants) {
-                                values.add(new JsonPrimitive(constant.toString()));
-                            }
-                            option.add("values", values);
-                            Object value = f.get(null);
-                            if (value == null) {
-                                option.add("value", new JsonPrimitive(0));
-                            } else {
-                                option.add("value", new JsonPrimitive(enumConstants.indexOf(value)));
-                            }
-                        }
-                        break;
-                }
-                arr.add(option);
-            }
-            return arr;
-        } catch (IllegalAccessException e) {
-	        e.printStackTrace();
-	        return null;
-        }
-    }
-
-    public static JsonArray getConfigJson(List<Class<?>> classes) {
+    public JsonElement getConfigJson() {
 	    JsonArray arr = new JsonArray();
-	    for (Class<?> klass : classes) {
+	    for (OptionGroup group : optionGroups) {
 	        JsonObject obj = new JsonObject();
-	        obj.add("name", new JsonPrimitive(klass.getSimpleName()));
-	        obj.add("options", getConfigJson(klass));
+	        obj.add("name", new JsonPrimitive(group.getName()));
+	        obj.add("options", group.getJson());
 	        arr.add(obj);
         }
         return arr;
     }
 
-    public static void updateClassWithJson(Class<?> klass, JsonArray configJson) {
-	    try {
-            for (int i = 0; i < configJson.size(); i++) {
-                JsonObject option = configJson.get(i).getAsJsonObject();
-                Field f = klass.getField(option.get("name").getAsString());
-                JsonElement value = option.get("value");
-                switch (option.get("type").getAsString()) {
-                    case "boolean":
-                        f.setBoolean(null, value.getAsBoolean());
-                        break;
-                    case "int":
-                        f.setInt(null, value.getAsInt());
-                        break;
-                    case "double":
-                        f.setDouble(null, value.getAsDouble());
-                        break;
-                    case "string":
-                        f.set(null, value.getAsString());
-                        break;
-                    case "enum":
-                        int index = value.getAsInt();
-                        f.set(null, f.getType().getEnumConstants()[index]);
-                        break;
-                }
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void updateClassesWithJson(List<Class<?>> classes, JsonArray configJson) {
-	    for (int i = 0; i < classes.size(); i++) {
-	        updateClassWithJson(classes.get(i), configJson.get(i).getAsJsonObject().get("options").getAsJsonArray());
+    public void updateConfigWithJson(JsonElement configJson) {
+        JsonArray arr = configJson.getAsJsonArray();
+	    for (int i = 0; i < arr.size(); i++) {
+	    	optionGroups.get(i).updateFromJson(arr.get(i));
         }
     }
 
@@ -168,7 +87,7 @@ public class RobotDashboard {
 
     public JsonObject getConfigUpdateMessage() {
 	    JsonObject data = new JsonObject();
-	    data.add("config", getConfigJson(configClasses));
+	    data.add("config", getConfigJson());
 	    return getMessage("update", data);
     }
 
@@ -239,7 +158,7 @@ public class RobotDashboard {
 		} else if (type.equals("update")) {
 			JsonObject data = msg.get("data").getAsJsonObject();
 			if (data.has("config")) {
-			    updateClassesWithJson(configClasses, data.get("config").getAsJsonArray());
+			    updateConfigWithJson(data.get("config"));
 			}
 		} else {
 			Log.i("Dashboard", String.format("unknown message recv'd: '%s'", type));

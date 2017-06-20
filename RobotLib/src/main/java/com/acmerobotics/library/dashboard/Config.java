@@ -6,6 +6,7 @@ import com.acmerobotics.library.configuration.OpModeConfiguration;
  * @author Ryan
  */
 
+@Persist("config")
 public class Config {
     public static OpModeConfiguration.AllianceColor allianceColor;
     public static OpModeConfiguration.ParkDest parkDest;

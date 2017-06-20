@@ -29,6 +29,7 @@ public class BasicOpMode extends OpMode implements SensorEventListener {
         SensorManager manager = (SensorManager) hardwareMap.appContext.getSystemService(Context.SENSOR_SERVICE);
         sensor = manager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
+        lastReading = new float[3];
     }
 
     @Override
