@@ -9,7 +9,12 @@ const DEFAULT_OPTIONS = {
   lineWidth: 2,
   durationMs: 30000,
   padding: 15,
+  keySpacing: 4,
+  keyLineWidth: 12,
   fontSize: 14,
+  fontColor: 'rgb(50, 50, 50)',
+  gridLineColor: 'rgb(120, 120, 120)',
+  smoothing: 0,
 };
 
 function niceNum(range, round) {
@@ -75,6 +80,23 @@ function formatTicks(tickValue, ticks) {
   return tickString;
 }
 
+function getTicks(axis) {
+  // get tick array
+  const ticks = [];
+  for (let i = axis[0]; i <= axis[1]; i += axis[2]) {
+    ticks.push(i);
+  }
+
+  // generate strings
+  const tickStrings = [];
+  for (let i = 0; i < ticks.length; i += 1) {
+    const s = formatTicks(ticks[i], ticks);
+    tickStrings.push(s);
+  }
+
+  return tickStrings;
+}
+
 function map(value, fromLow, fromHigh, toLow, toHigh) {
   const frac = (value - fromLow) / (fromHigh - fromLow);
   return toLow + frac * (toHigh - toLow);
@@ -86,17 +108,19 @@ export default class Graph {
     this.ctx = canvas.getContext('2d');
     this.options = DEFAULT_OPTIONS;
     Object.assign(this.options, options || {});
+    this.clear();
+  }
+
+  clear() {
     this.time = [];
     this.datasets = [];
     this.lastDataTime = 0;
-    this.lastSimTime = 0;
   }
 
   addData(data) {
-    if (data.length !== (this.datasets.length + 1)) {
+    if (this.lastDataTime === 0) {
       this.lastSimTime = Date.now() + 250;
-      this.time = [this.lastSimTime];
-      this.datasets = [];
+      this.time.push(this.lastSimTime);
       let color = 0;
       for (let i = 0; i < data.length; i += 1) {
         if (data[i].name === 'time') {
@@ -127,54 +151,7 @@ export default class Graph {
     }
   }
 
-  renderGraph(x = 0, y = 0, width = this.canvas.width, height = this.canvas.height) {
-    const o = this.options;
-    this.ctx.fillStyle = 'white';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.font = `${o.fontSize}px sans-serif`;
-    this.ctx.textBaseline = 'middle';
-    this.ctx.textAlign = 'left';
-    this.ctx.lineWidth = o.lineWidth;
-    const keyHeight = this.renderKey(x, y, width);
-    this.renderAxesAndLines(x, y + keyHeight, width, height - keyHeight);
-  }
-
-  renderKey(x, y, width) {
-    const o = this.options;
-    const keyLineWidth = 16;
-    const numSets = this.datasets.length;
-    const height = numSets * o.fontSize + (numSets - 1) * 4;
-    for (let i = 0; i < numSets; i += 1) {
-      const lineY = y + i * (o.fontSize + 4) + o.fontSize / 2;
-      const name = this.datasets[i].name;
-      const color = this.datasets[i].color;
-      const lineWidth = this.ctx.measureText(name).width + keyLineWidth + 4;
-      const lineX = x + (width - lineWidth) / 2;
-
-      this.ctx.strokeStyle = color;
-      this.ctx.beginPath();
-      this.ctx.moveTo(lineX, lineY);
-      this.ctx.lineTo(lineX + keyLineWidth, lineY);
-      this.ctx.stroke();
-
-      this.ctx.fillStyle = 'black';
-      this.ctx.fillText(name, lineX + keyLineWidth + 4, lineY);
-    }
-    return height;
-  }
-
-  renderAxesAndLines(x, y, width, height) {
-    if (this.datasets.length === 0 || this.datasets[0].data.length === 0) return;
-    const o = this.options;
-    // remove old points
-    const now = Date.now();
-    while ((now - this.time[0]) > (o.durationMs + 250)) {
-      this.time.shift();
-      for (let i = 0; i < this.datasets.length; i += 1) {
-        this.datasets[i].data.shift();
-      }
-    }
-
+  getAxis() {
     // get y-axis scaling
     let min = Number.MAX_VALUE;
     let max = Number.MIN_VALUE;
@@ -189,80 +166,146 @@ export default class Graph {
         }
       }
     }
-    const scaling = getAxisScaling(min, max);
+    return getAxisScaling(min, max);
+  }
 
-    // configure text options
+  render(x = 0, y = 0, width = this.canvas.width, height = this.canvas.height) {
+    const o = this.options;
+    this.canvas.width = this.canvas.width;
+    this.ctx.font = `${o.fontSize}px sans-serif`;
+    this.ctx.textBaseline = 'middle';
+    this.ctx.textAlign = 'left';
+    this.ctx.lineWidth = o.lineWidth;
+    const keyHeight = this.renderKey(x, y, width);
+    this.renderGraph(x, y + keyHeight, width, height - keyHeight);
+  }
+
+  renderKey(x, y, width) {
+    const o = this.options;
+    const numSets = this.datasets.length;
+    const height = numSets * o.fontSize + (numSets - 1) * o.keySpacing;
+    for (let i = 0; i < numSets; i += 1) {
+      const lineY = y + i * (o.fontSize + o.keySpacing) + o.fontSize / 2;
+      const name = this.datasets[i].name;
+      const color = this.datasets[i].color;
+      const lineWidth = this.ctx.measureText(name).width + o.keyLineWidth + o.keySpacing;
+      const lineX = x + (width - lineWidth) / 2;
+
+      this.ctx.strokeStyle = color;
+      this.ctx.beginPath();
+      this.ctx.moveTo(lineX, lineY);
+      this.ctx.lineTo(lineX + o.keyLineWidth, lineY);
+      this.ctx.stroke();
+
+      this.ctx.fillStyle = o.fontColor;
+      this.ctx.fillText(name, lineX + o.keyLineWidth + o.keySpacing, lineY);
+    }
+    return height;
+  }
+
+  renderGraph(x, y, width, height) {
+    if (this.datasets.length === 0 || this.datasets[0].data.length === 0) return;
+    const o = this.options;
+    // remove old points
+    const now = Date.now();
+    while ((now - this.time[0]) > (o.durationMs + 250)) {
+      this.time.shift();
+      for (let i = 0; i < this.datasets.length; i += 1) {
+        this.datasets[i].data.shift();
+      }
+    }
+
+    const graphHeight = height - 2 * o.padding;
+
+    const axis = this.getAxis();
+    const ticks = getTicks(axis);
+    const axisWidth = this.renderAxisLabels(x + o.padding, y + o.padding, graphHeight, ticks);
+
+    const graphWidth = width - axisWidth - 3 * o.padding;
+
+    this.renderGridLines(
+      x + axisWidth + 2 * o.padding,
+      y + o.padding,
+      graphWidth,
+      graphHeight,
+      5,
+      ticks.length);
+
+    this.renderGraphLines(
+      x + axisWidth + 2 * o.padding,
+      y + o.padding,
+      graphWidth,
+      graphHeight,
+      axis);
+  }
+
+  renderAxisLabels(x, y, height, ticks) {
+    let width = 0;
+    for (let i = 0; i < ticks.length; i += 1) {
+      const textWidth = this.ctx.measureText(ticks[i]).width;
+      if (textWidth > width) {
+        width = textWidth;
+      }
+    }
+
+    // draw axis labels
     this.ctx.textAlign = 'right';
-    this.ctx.strokeStyle = 'rgb(120, 120, 120)';
-    this.ctx.fillStyle = 'rgb(50, 50, 50)';
-    this.ctx.lineJoins = 'round';
+    this.ctx.fillStyle = this.options.fontColor;
+
+    const vertSpacing = height / (ticks.length - 1);
+    x += width;
+    for (let i = 0; i < ticks.length; i += 1) {
+      this.ctx.fillText(ticks[i], x, y + (ticks.length - i - 1) * vertSpacing);
+    }
+
+    return width;
+  }
+
+  renderGridLines(x, y, width, height, numTicksX, numTicksY) {
+    this.ctx.strokeStyle = this.options.gridLineColor;
     this.ctx.lineWidth = 1;
 
-    // get tick array
-    const ticks = [];
-    for (let i = scaling[0]; i <= scaling[1]; i += scaling[2]) {
-      ticks.push(i);
-    }
+    const horSpacing = width / (numTicksX - 1);
+    const vertSpacing = height / (numTicksY - 1);
 
-    // generate strings
-    let maxTextWidth = 0;
-    const tickStrings = [];
-    for (let i = 0; i < ticks.length; i += 1) {
-      const s = formatTicks(ticks[i], ticks);
-      tickStrings.push(s);
-      const textWidth = this.ctx.measureText(s).width;
-      if (textWidth > maxTextWidth) {
-        maxTextWidth = textWidth;
-      }
-    }
-
-    // draw axis labels and horizontal gridlines
-    const graphHeight = height - (2 * o.padding);
-    const vertSpacing = graphHeight / (ticks.length - 1);
-    x += o.padding + maxTextWidth;
-    y += o.padding;
-    for (let i = 0; i < tickStrings.length; i += 1) {
-      this.ctx.fillText(tickStrings[i], x, y + (ticks.length - i - 1) * vertSpacing);
+    for (let i = 0; i < numTicksX; i += 1) {
+      const lineX = x + horSpacing * i + 0.5;
       this.ctx.beginPath();
-      this.ctx.moveTo(
-        x + o.padding,
-        Math.floor(y + (ticks.length - i - 1) * vertSpacing) + 0.5);
-      this.ctx.lineTo(
-        width - o.padding,
-        Math.floor(y + (ticks.length - i - 1) * vertSpacing) + 0.5);
+      this.ctx.moveTo(lineX, y);
+      this.ctx.lineTo(lineX, y + height);
       this.ctx.stroke();
     }
 
-    x += o.padding;
-
-    // draw vertical gridlines
-    const graphWidth = width - x - o.padding;
-    const horSpacing = graphWidth / 4;
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < numTicksY; i += 1) {
+      const lineY = y + vertSpacing * i + 0.5;
       this.ctx.beginPath();
-      this.ctx.moveTo(Math.floor(x + i * horSpacing) + 0.5, y);
-      this.ctx.lineTo(Math.floor(x + i * horSpacing) + 0.5, y + height - 2 * o.padding);
+      this.ctx.moveTo(x, lineY);
+      this.ctx.lineTo(x + width, lineY);
       this.ctx.stroke();
     }
+  }
 
+  renderGraphLines(x, y, width, height, axis) {
+    const o = this.options;
+    const now = Date.now();
     // draw data lines
+    this.ctx.lineWidth = o.lineWidth;
+    this.ctx.beginPath();
+    this.ctx.rect(x, y, width, height);
+    this.ctx.clip();
     for (let i = 0; i < this.datasets.length; i += 1) {
       const d = this.datasets[i];
+      let value = d.data[0];
       this.ctx.beginPath();
       this.ctx.strokeStyle = d.color;
-      this.ctx.lineWidth = o.lineWidth;
-      this.ctx.moveTo(x + (this.time[0] - now + o.durationMs) * graphWidth / o.durationMs,
-        y + map(d.data[0], scaling[0], scaling[1], graphHeight, 0));
+      this.ctx.moveTo(x + (this.time[0] - now + o.durationMs) * width / o.durationMs,
+        y + map(value, axis[0], axis[1], height, 0));
       for (let j = 1; j < d.data.length; j += 1) {
-        this.ctx.lineTo(x + (this.time[j] - now + o.durationMs) * graphWidth / o.durationMs,
-          y + map(d.data[j], scaling[0], scaling[1], graphHeight, 0));
+        value = o.smoothing * value + (1 - o.smoothing) * d.data[j];
+        this.ctx.lineTo(x + (this.time[j] - now + o.durationMs) * width / o.durationMs,
+          y + map(value, axis[0], axis[1], height, 0));
       }
       this.ctx.stroke();
     }
-
-    // cover up horizontal overflow
-    this.ctx.fillStyle = 'white';
-    this.ctx.fillRect(x - o.padding, y, o.padding, graphHeight);
-    this.ctx.fillRect(x + graphWidth + 1, y, o.padding, graphHeight);
   }
 }

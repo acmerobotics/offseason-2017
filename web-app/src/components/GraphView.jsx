@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import Graph from './Graph';
 
+function shallowArrEquals(arr1, arr2) {
+  return arr1.length === arr2.length && arr1.every(val => arr2.indexOf(val) !== -1);
+}
+
 class GraphView extends Component {
   constructor(props) {
     super(props);
@@ -14,12 +18,17 @@ class GraphView extends Component {
   }
 
   componentDidMount() {
+    this.lastKeys = [];
     this.graph = new Graph(this.canvas);
     this.renderGraph();
     document.addEventListener('keydown', this.handleDocumentKeydown);
   }
 
   componentDidUpdate() {
+    if (!shallowArrEquals(this.lastKeys, this.props.keys)) {
+      this.graph.clear();
+      this.lastKeys = this.props.keys;
+    }
     if (this.props.keys.length > 0) {
       this.graph.addData(
         this.props.telemetry
@@ -44,7 +53,7 @@ class GraphView extends Component {
 
   renderGraph() {
     if (!this.state.paused) {
-      this.graph.renderGraph(0, 0,
+      this.graph.render(0, 0,
         Math.min(this.canvas.parentElement.clientWidth - 50, 1000),
         Math.min(this.canvas.parentElement.clientHeight - 50, 1000));
       requestAnimationFrame(this.renderGraph);
