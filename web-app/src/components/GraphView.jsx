@@ -2,9 +2,21 @@ import React, { Component } from 'react';
 import Graph from './Graph';
 
 class GraphView extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      paused: false,
+    };
+
+    this.handleDocumentKeydown = this.handleDocumentKeydown.bind(this);
+    this.renderGraph = this.renderGraph.bind(this);
+  }
+
   componentDidMount() {
     this.graph = new Graph(this.canvas);
     this.renderGraph();
+    document.addEventListener('keydown', this.handleDocumentKeydown);
   }
 
   componentDidUpdate() {
@@ -17,11 +29,28 @@ class GraphView extends Component {
     }
   }
 
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleDocumentKeydown);
+  }
+
+  handleDocumentKeydown(evt) {
+    console.log(evt);
+    if (evt.code === 'Space') {
+      this.setState({
+        paused: !this.state.paused,
+      }, () => {
+        this.renderGraph();
+      });
+    }
+  }
+
   renderGraph() {
-    this.graph.renderGraph(0, 0,
-      Math.min(this.canvas.parentElement.clientWidth - 50, 1000),
-      Math.min(this.canvas.parentElement.clientHeight - 50, 1000));
-    requestAnimationFrame(this.renderGraph.bind(this));
+    if (!this.state.paused) {
+      this.graph.renderGraph(0, 0,
+        Math.min(this.canvas.parentElement.clientWidth - 50, 1000),
+        Math.min(this.canvas.parentElement.clientHeight - 50, 1000));
+      requestAnimationFrame(this.renderGraph);
+    }
   }
 
   render() {
