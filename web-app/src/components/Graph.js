@@ -1,5 +1,5 @@
 const DEFAULT_OPTIONS = {
-  color: [
+  colors: [
     '#2979ff',
     '#dd2c00',
     '#4caf50',
@@ -7,8 +7,8 @@ const DEFAULT_OPTIONS = {
     '#ffa000',
   ],
   lineWidth: 2,
-  durationMs: 25000,
-  padding: 20,
+  durationMs: 30000,
+  padding: 15,
   fontSize: 14,
 };
 
@@ -86,55 +86,101 @@ export default class Graph {
     this.ctx = canvas.getContext('2d');
     this.options = DEFAULT_OPTIONS;
     Object.assign(this.options, options || {});
-    this.data = [[]];
+    this.time = [];
+    this.datasets = [];
     this.lastDataTime = 0;
     this.lastSimTime = 0;
   }
 
-  renderGraph(x = 0, y = 0, width = this.canvas.width, height = this.canvas.height) {
-    this.ctx.fillStyle = 'white';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.renderAxesAndLines(x, y, width, height);
+  addData(data) {
+    if (data.length !== (this.datasets.length + 1)) {
+      this.lastSimTime = Date.now() + 250;
+      this.time = [this.lastSimTime];
+      this.datasets = [];
+      let color = 0;
+      for (let i = 0; i < data.length; i += 1) {
+        if (data[i].name === 'time') {
+          this.lastDataTime = data[i].value;
+        } else {
+          this.datasets.push({
+            name: data[i].name,
+            data: [data[i].value],
+            color: this.options.colors[color % data.length],
+          });
+          color += 1;
+        }
+      }
+    } else {
+      for (let i = 0; i < data.length; i += 1) {
+        if (data[i].name === 'time') {
+          this.lastSimTime += (data[i].value - this.lastDataTime);
+          this.time.push(this.lastSimTime);
+          this.lastDataTime = data[i].value;
+        } else {
+          for (let j = 0; j < this.datasets.length; j += 1) {
+            if (data[i].name === this.datasets[j].name) {
+              this.datasets[j].data.push(data[i].value);
+            }
+          }
+        }
+      }
+    }
   }
 
-  addData(time, data) {
-    if ((data.length + 1) !== this.data.length) {
-      this.data = [];
-      for (let i = 0; i <= data.length; i += 1) {
-        this.data.push([]);
-      }
-      this.lastDataTime = 0;
+  renderGraph(x = 0, y = 0, width = this.canvas.width, height = this.canvas.height) {
+    const o = this.options;
+    this.ctx.fillStyle = 'white';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.font = `${o.fontSize}px sans-serif`;
+    this.ctx.textBaseline = 'middle';
+    this.ctx.textAlign = 'left';
+    this.ctx.lineWidth = o.lineWidth;
+    const keyHeight = this.renderKey(x, y, width);
+    this.renderAxesAndLines(x, y + keyHeight, width, height - keyHeight);
+  }
+
+  renderKey(x, y, width) {
+    const o = this.options;
+    const keyLineWidth = 16;
+    const numSets = this.datasets.length;
+    const height = numSets * o.fontSize + (numSets - 1) * 4;
+    for (let i = 0; i < numSets; i += 1) {
+      const lineY = y + i * (o.fontSize + 4) + o.fontSize / 2;
+      const name = this.datasets[i].name;
+      const color = this.datasets[i].color;
+      const lineWidth = this.ctx.measureText(name).width + keyLineWidth + 4;
+      const lineX = x + (width - lineWidth) / 2;
+
+      this.ctx.strokeStyle = color;
+      this.ctx.beginPath();
+      this.ctx.moveTo(lineX, lineY);
+      this.ctx.lineTo(lineX + keyLineWidth, lineY);
+      this.ctx.stroke();
+
+      this.ctx.fillStyle = 'black';
+      this.ctx.fillText(name, lineX + keyLineWidth + 4, lineY);
     }
-    const now = Date.now();
-    if (this.lastDataTime === 0) {
-      this.lastSimTime = now + 250;
-    } else {
-      this.lastSimTime += (time - this.lastDataTime);
-    }
-    this.lastDataTime = time;
-    this.data[0].push(this.lastSimTime);
-    for (let i = 0; i < data.length; i += 1) {
-      this.data[i + 1].push(data[i]);
-    }
+    return height;
   }
 
   renderAxesAndLines(x, y, width, height) {
-    if (this.data[0].length === 0) return;
+    if (this.datasets.length === 0 || this.datasets[0].data.length === 0) return;
     const o = this.options;
     // remove old points
     const now = Date.now();
-    while ((now - this.data[0][0]) > (o.durationMs + 250)) {
-      for (let i = 0; i < this.data.length; i += 1) {
-        this.data[i].shift();
+    while ((now - this.time[0]) > (o.durationMs + 250)) {
+      this.time.shift();
+      for (let i = 0; i < this.datasets.length; i += 1) {
+        this.datasets[i].data.shift();
       }
     }
 
     // get y-axis scaling
     let min = Number.MAX_VALUE;
     let max = Number.MIN_VALUE;
-    for (let i = 1; i < this.data.length; i += 1) {
-      for (let j = 0; j < this.data[i].length; j += 1) {
-        const val = this.data[i][j];
+    for (let i = 0; i < this.datasets.length; i += 1) {
+      for (let j = 0; j < this.datasets[i].data.length; j += 1) {
+        const val = this.datasets[i].data[j];
         if (val > max) {
           max = val;
         }
@@ -147,8 +193,6 @@ export default class Graph {
 
     // configure text options
     this.ctx.textAlign = 'right';
-    this.ctx.font = `${o.fontSize}px sans-serif`;
-    this.ctx.textBaseline = 'middle';
     this.ctx.strokeStyle = 'rgb(120, 120, 120)';
     this.ctx.fillStyle = 'rgb(50, 50, 50)';
     this.ctx.lineJoins = 'round';
@@ -197,23 +241,21 @@ export default class Graph {
     for (let i = 0; i < 5; i += 1) {
       this.ctx.beginPath();
       this.ctx.moveTo(Math.floor(x + i * horSpacing) + 0.5, y);
-      this.ctx.lineTo(Math.floor(x + i * horSpacing) + 0.5, height - o.padding);
+      this.ctx.lineTo(Math.floor(x + i * horSpacing) + 0.5, y + height - 2 * o.padding);
       this.ctx.stroke();
     }
 
     // draw data lines
-    const time = this.data[0];
-    for (let i = 1; i < this.data.length; i += 1) {
-      const d = this.data[i];
-
+    for (let i = 0; i < this.datasets.length; i += 1) {
+      const d = this.datasets[i];
       this.ctx.beginPath();
-      this.ctx.strokeStyle = o.color[(i - 1) % o.color.length];
+      this.ctx.strokeStyle = d.color;
       this.ctx.lineWidth = o.lineWidth;
-      this.ctx.moveTo(x + (time[0] - now + o.durationMs) * graphWidth / o.durationMs,
-        map(d[0], scaling[0], scaling[1], o.padding + graphHeight, o.padding));
-      for (let j = 1; j < d.length; j += 1) {
-        this.ctx.lineTo(x + (time[j] - now + o.durationMs) * graphWidth / o.durationMs,
-          map(d[j], scaling[0], scaling[1], o.padding + graphHeight, o.padding));
+      this.ctx.moveTo(x + (this.time[0] - now + o.durationMs) * graphWidth / o.durationMs,
+        y + map(d.data[0], scaling[0], scaling[1], graphHeight, 0));
+      for (let j = 1; j < d.data.length; j += 1) {
+        this.ctx.lineTo(x + (this.time[j] - now + o.durationMs) * graphWidth / o.durationMs,
+          y + map(d.data[j], scaling[0], scaling[1], graphHeight, 0));
       }
       this.ctx.stroke();
     }

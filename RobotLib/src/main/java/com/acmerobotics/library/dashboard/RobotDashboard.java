@@ -34,9 +34,8 @@ public class RobotDashboard {
 		return dashboard;
 	}
 
-	private Map<String, String> telemetry;
+	private Map<String, JsonElement> telemetry;
 	private SharedPreferences prefs;
-	private SharedPreferences.Editor editor;
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
     private List<OptionGroup> optionGroups;
@@ -93,11 +92,11 @@ public class RobotDashboard {
 
 	private JsonElement getTelemetryJson() {
 		JsonArray arr = new JsonArray();
-		for (Entry<String, String> line : telemetry.entrySet()) {
-			JsonArray lineArray = new JsonArray();
-			lineArray.add(line.getKey());
-			lineArray.add(line.getValue());
-			arr.add(lineArray);
+		for (Entry<String, JsonElement> line : telemetry.entrySet()) {
+			JsonObject obj = new JsonObject();
+			obj.add("name", new JsonPrimitive(line.getKey()));
+			obj.add("value", line.getValue());
+			arr.add(obj);
 		}
 		return arr;
 	}
@@ -109,15 +108,23 @@ public class RobotDashboard {
 	}
 
 	public void addTelemetry(String key, String value) {
-		telemetry.put(key, value);
+		addTelemetry(key, new JsonPrimitive(value));
 	}
 
-	public void addTelemetry(String key, Object value) {
-		addTelemetry(key, value.toString());
-	}
+	public void addTelemetry(String key, boolean value) {
+	    addTelemetry(key, new JsonPrimitive(value));
+    }
 
-	public void addTelemetry(String key, String value, Object...args) {
-		addTelemetry(key, String.format(value, args));
+	public void addTelemetry(String key, int value) {
+	    addTelemetry(key, new JsonPrimitive(value));
+    }
+
+    public void addTelemetry(String key, double value) {
+	    addTelemetry(key, new JsonPrimitive(value));
+    }
+
+	public void addTelemetry(String key, JsonElement element) {
+		telemetry.put(key, element);
 	}
 
 	public void updateTelemetry() {

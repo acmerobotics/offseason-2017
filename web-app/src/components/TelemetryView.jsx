@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
 
+const shorten = (str, len) => {
+  str = str.toString();
+  if (str.length > len) {
+    return `${str.slice(0, len - 3)}...`;
+  }
+  return str;
+};
+
 class TelemetryView extends Component {
   constructor(props) {
     super(props);
@@ -28,15 +36,21 @@ class TelemetryView extends Component {
 
   render() {
     const tableRows = this.props.telemetry.map(item => (
-      <tr key={item[0]}>
-        <td>{item[0]}</td>
-        <td>{item[1]}</td>
-        <td>
-          <input
-            type="checkbox"
-            value={this.state.selected.indexOf(item[0]) !== -1}
-            onChange={evt => this.handleItemSelect(evt, item[0])} />
-        </td>
+      <tr key={item.name}>
+        <td>{item.name}</td>
+        <td>{shorten(item.value, 15)}</td>
+        {
+          item.name === 'time'
+            ? <td />
+            : (
+              <td>
+                <input
+                  type="checkbox"
+                  value={this.state.selected.indexOf(item.name) !== -1}
+                  onChange={evt => this.handleItemSelect(evt, item.name)} />
+              </td>
+            )
+        }
       </tr>
     ));
     const style = {

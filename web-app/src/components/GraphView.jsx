@@ -21,11 +21,9 @@ class GraphView extends Component {
 
   componentDidUpdate() {
     if (this.props.keys.length > 0) {
-      const data = [];
-      this.props.telemetry
-        .filter(entry => this.props.keys.indexOf(entry[0]) !== -1)
-        .forEach(entry => data.push(parseFloat(entry[1])));
-      this.graph.addData(parseInt(this.props.telemetry[0][1], 10), data);
+      this.graph.addData(
+        this.props.telemetry
+          .filter(entry => (this.props.keys.indexOf(entry.name) !== -1 || entry.name === 'time')));
     }
   }
 
