@@ -286,9 +286,6 @@ public class FtcRobotControllerActivity extends Activity {
     startWatchdogService();
     bindToService();
     logPackageVersions();
-
-    // TODO dashboard
-    dashboard = RobotDashboard.open(this);
   }
 
   protected UpdateUI createUpdateUI() {
@@ -365,9 +362,6 @@ public class FtcRobotControllerActivity extends Activity {
     stopWatchdogService();
     wifiLock.release();
     RobotLog.cancelWriteLogcatToDisk();
-
-    // TODO dashboard
-    dashboard.stop();
   }
 
   protected void bindToService() {
@@ -575,6 +569,9 @@ public class FtcRobotControllerActivity extends Activity {
     controllerService.setupRobot(eventLoop, idleLoop);
 
     passReceivedUsbAttachmentsToEventLoop();
+
+    // TODO dashboard entry point
+    dashboard = RobotDashboard.open(this, eventLoop);
   }
 
   protected OpModeRegister createOpModeRegister() {
@@ -583,6 +580,9 @@ public class FtcRobotControllerActivity extends Activity {
 
   private void shutdownRobot() {
     if (controllerService != null) controllerService.shutdownRobot();
+
+    // TODO dashboard exit point
+    if (dashboard != null) dashboard.stop();
   }
 
   private void requestRobotRestart() {

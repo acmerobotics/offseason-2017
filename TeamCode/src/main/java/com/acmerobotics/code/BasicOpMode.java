@@ -6,6 +6,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -25,6 +26,7 @@ public class BasicOpMode extends OpMode implements SensorEventListener {
 
     @Override
     public void init() {
+        Log.i("DashboardThread", Thread.currentThread().getName());
         dashboard = RobotDashboard.getInstance();
         SensorManager manager = (SensorManager) hardwareMap.appContext.getSystemService(Context.SENSOR_SERVICE);
         sensor = manager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);

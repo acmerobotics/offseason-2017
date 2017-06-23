@@ -1,15 +1,12 @@
 package com.acmerobotics.library.dashboard;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-
-import org.firstinspires.ftc.robotcore.internal.AppUtil;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -27,8 +24,12 @@ public class OptionGroup {
     private SharedPreferences.Editor editor;
 
     public OptionGroup(Class<?> klass, SharedPreferences prefs) {
+        this(klass, klass.getSimpleName(), prefs);
+    }
+
+    public OptionGroup(Class<?> klass, String name, SharedPreferences prefs) {
         this.klass = klass;
-        this.name = klass.getSimpleName();
+        this.name = name;
 
         if (klass.isAnnotationPresent(Persist.class)) {
             this.prefs = prefs;

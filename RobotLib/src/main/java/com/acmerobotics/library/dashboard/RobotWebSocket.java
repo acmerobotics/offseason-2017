@@ -1,10 +1,11 @@
 package com.acmerobotics.library.dashboard;
 
-import java.io.IOException;
+import android.util.Log;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import java.io.IOException;
 
 import fi.iki.elonen.NanoHTTPD.IHTTPSession;
 import fi.iki.elonen.NanoWSD.WebSocket;
@@ -24,13 +25,13 @@ public class RobotWebSocket extends WebSocket {
 
 	@Override
 	protected void onOpen() {
-		System.out.println("[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+		Log.i("Dashboard", "[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
 		dashboard.addSocket(this);
 	}
 
 	@Override
 	protected void onClose(CloseCode code, String reason, boolean initiatedByRemote) {
-		System.out.println("[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+		Log.i("Dashboard", "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
 		dashboard.removeSocket(this);
 	}
 

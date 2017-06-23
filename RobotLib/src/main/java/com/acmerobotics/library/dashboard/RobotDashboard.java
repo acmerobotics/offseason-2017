@@ -4,29 +4,32 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.Map.Entry;
-
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.qualcomm.robotcore.eventloop.EventLoop;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
+import com.qualcomm.robotcore.eventloop.opmode.OpModeMeta;
+import com.qualcomm.robotcore.util.ClassFilter;
+import com.qualcomm.robotcore.util.ClassManager;
 
-import org.json.JSONArray;
-
-import static com.acmerobotics.library.configuration.OpModeConfiguration.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class RobotDashboard {
 
 	private static RobotDashboard dashboard;
 
-	public static RobotDashboard open(Context ctx) {
-		dashboard = new RobotDashboard(ctx);
+	public static RobotDashboard open(Context ctx, EventLoop eventLoop) {
+		dashboard = new RobotDashboard(ctx, eventLoop.getOpModeManager());
 		return dashboard;
 	}
 
@@ -34,22 +37,40 @@ public class RobotDashboard {
 		return dashboard;
 	}
 
+	public static final String CONFIG_PREFS = "config";
+
 	private Map<String, JsonElement> telemetry;
 	private SharedPreferences prefs;
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
     private List<OptionGroup> optionGroups;
-	private Gson gson;
+    private OpModeManagerImpl manager;
 	
-	private RobotDashboard(Context ctx) {
-		prefs = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+	private RobotDashboard(Context ctx, OpModeManagerImpl manager) {
+		prefs = ctx.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
 		telemetry = new HashMap<>();
-		gson = new Gson();
+
+		this.manager = manager;
+//		manager.registerListener(this);
 
 		optionGroups = new ArrayList<>();
-		optionGroups.add(new OptionGroup(Config.class, prefs));
-		optionGroups.add(new OptionGroup(Constants.class, prefs));
+		try {
+            final ClassManager classManager = new ClassManager();
+            classManager.registerFilter(new ClassFilter() {
+                @Override
+                public void filter(Class clazz) {
+                    if (clazz.isAnnotationPresent(Config.class)) {
+                        Config annotation = (Config) clazz.getAnnotation(Config.class);
+                        String name = annotation.value().equals("") ? clazz.getSimpleName() : annotation.value();
+                        optionGroups.add(new OptionGroup(clazz, name, prefs));
+                    }
+                }
+            });
+            classManager.processAllClasses();
+        } catch (IOException e) {
+            Log.e("DashboardConfig", e.getMessage());
+        }
 
 		server = new RobotWebSocketServer(this);
 		try {
@@ -57,6 +78,7 @@ public class RobotDashboard {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 	}
 
     public JsonElement getConfigJson() {
@@ -177,5 +199,4 @@ public class RobotDashboard {
 		server.stop();
 		dashboard = null;
 	}
-	
 }

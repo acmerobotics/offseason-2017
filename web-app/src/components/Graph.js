@@ -12,7 +12,7 @@ const DEFAULT_OPTIONS = {
   keySpacing: 4,
   keyLineWidth: 12,
   fontSize: 14,
-  fontColor: 'rgb(50, 50, 50)',
+  textColor: 'rgb(50, 50, 50)',
   gridLineColor: 'rgb(120, 120, 120)',
   smoothing: 0,
 };
@@ -197,15 +197,25 @@ export default class Graph {
       this.ctx.lineTo(lineX + o.keyLineWidth, lineY);
       this.ctx.stroke();
 
-      this.ctx.fillStyle = o.fontColor;
+      this.ctx.fillStyle = o.textColor;
       this.ctx.fillText(name, lineX + o.keyLineWidth + o.keySpacing, lineY);
     }
     return height;
   }
 
   renderGraph(x, y, width, height) {
-    if (this.datasets.length === 0 || this.datasets[0].data.length === 0) return;
     const o = this.options;
+    if (this.datasets.length === 0 || this.datasets[0].data.length === 0) {
+      // this.ctx.fillStyle = 'rgb(200, 200, 200)';
+      // this.ctx.fillRect(x, y, width, height);
+      //
+      // this.ctx.font = `${5 * o.fontSize}px sans-serif`;
+      // this.ctx.textAlign = 'center';
+      // this.ctx.textBaseline = 'middle';
+      // this.ctx.fillStyle = o.textColor;
+      // this.ctx.fillText('No Data', x + width / 2, y + height / 2);
+      return;
+    }
     // remove old points
     const now = Date.now();
     while ((now - this.time[0]) > (o.durationMs + 250)) {
@@ -250,7 +260,7 @@ export default class Graph {
 
     // draw axis labels
     this.ctx.textAlign = 'right';
-    this.ctx.fillStyle = this.options.fontColor;
+    this.ctx.fillStyle = this.options.textColor;
 
     const vertSpacing = height / (ticks.length - 1);
     x += width;
