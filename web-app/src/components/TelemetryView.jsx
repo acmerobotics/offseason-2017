@@ -54,8 +54,8 @@ class TelemetryView extends Component {
       </tr>
     ));
     const style = {
-      gridRow: 1,
-      gridColumn: 3,
+      gridRow: 2,
+      gridColumn: 2,
     };
     return (
       <div className="tile" style={style}>

@@ -61,7 +61,7 @@ class GraphView extends Component {
 
   render() {
     const style = {
-      gridRow: 1,
+      gridRow: '1 / span 2',
       gridColumn: 1,
       overflow: 'hidden',
     };

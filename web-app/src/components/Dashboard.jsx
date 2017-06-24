@@ -112,6 +112,7 @@ class Dashboard extends Component {
       });
     };
     this.socket.onclose = () => {
+      console.log('socket closed');
       this.setState({
         isConnected: false,
       });
@@ -133,6 +134,9 @@ class Dashboard extends Component {
           </div>
         </header>
         <div id="grid">
+          <TelemetryView
+            telemetry={this.state.telemetry}
+            onGraph={this.handleGraph} />
           <GraphView
             telemetry={this.state.telemetry}
             keys={this.state.graphKeys} />
@@ -141,9 +145,6 @@ class Dashboard extends Component {
             onChange={this.handleConfigChange}
             onSave={this.handleConfigSave}
             onRefresh={this.handleConfigRefresh} />
-          <TelemetryView
-            telemetry={this.state.telemetry}
-            onGraph={this.handleGraph} />
         </div>
       </div>
     );

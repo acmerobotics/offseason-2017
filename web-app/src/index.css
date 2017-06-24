@@ -1,16 +1,15 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:400');
 body { font-family: "Roboto", sans-serif; margin: 0; padding: 0; font-size: 14px; }
-header { display: flex; justify-content: space-between; align-items: center; height: 38px; width: calc(100% - 16px); background-color: rgb(48, 129, 253); color: white; padding: 8px; }
-#grid { display: grid; grid-template: 1fr / 45% 32.5% 22.5%; width: 100%; height: calc(100vh - 54px); }
+header { display: flex; justify-content: space-between; align-items: center; height: 38px; width: calc(100% - 16px); background-color: #2962ff; color: white; padding: 8px; }
+#grid { display: grid; grid-template: 65% 35% / 65% 35%; width: 100%; height: calc(100vh - 54px); }
 .tile { border: 1px solid #EEE; padding: 16px; overflow: auto; }
 .tile h2 { margin: 0; }
-/*.tile h3 { margin-bottom: 0; order: 0; }*/
 .heading { display: flex; justify-content: space-between; align-items: center; }
 table { margin: 0; width: 100%; border-collapse: collapse; text-align: left; }
 td { padding: 4px; }
-#telemetry td { border: 1px solid black; }
-#telemetry td:first-of-type { width: 30%; }
 input { font-size: inherit; outline: none; }
+.iconGroup { display: flex; order: 10; }
+.icon { background-repeat: round; margin: 4px; }
 .small { width: 24px; height: 24px; }
 .large { width: 36px; height: 36px; }
 .save { background-image: url('icons/save.svg'); }
@@ -18,6 +17,3 @@ input { font-size: inherit; outline: none; }
 .no-wifi { background-image: url('icons/wifi_off.svg'); }
 .chart { background-image: url('icons/chart.svg'); }
 .refresh { background-image: url('icons/refresh.svg'); }
-.iconGroup { display: flex; order: 10; }
-.icon { background-repeat: round; margin: 4px; }
-#config td:first-of-type { text-align: right; }

@@ -40,7 +40,7 @@ export default function validateOptionInput(option, newValue) {
     return validateInt(option.value, newValue);
   case 'double':
     return validateDouble(option.value, newValue);
-  case 'pid':
+  case 'pid': {
     const key = Object.keys(newValue)[0];
     const { valid, value } = validateDouble(option.value[key], newValue[key]);
     if (!option.invalid) {
@@ -58,6 +58,7 @@ export default function validateOptionInput(option, newValue) {
         [key]: value,
       },
     };
+  }
   default:
     return {
       valid: true,
