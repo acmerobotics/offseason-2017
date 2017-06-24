@@ -1,6 +1,7 @@
 package com.acmerobotics.code;
 
 import com.acmerobotics.library.dashboard.Config;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 /**
  * @author Ryan
@@ -8,8 +9,6 @@ import com.acmerobotics.library.dashboard.Config;
 
 @Config("Constants")
 public class Constants {
-    public static double p = 0.1;
-    public static double i = 0.01;
-    public static double d = 0.03;
     public static int testNum = 3;
+    public static PIDCoefficients drivePid = new PIDCoefficients(0.22, 0.1, 0);
 }

@@ -22,13 +22,17 @@ class ConfigView extends Component {
       gridRow: 1,
       gridColumn: 2,
     };
+    let saveIcon;
+    if (this.props.config.every(v => !v.invalid || v.invalid.length === 0)) {
+      saveIcon = <div className="small save icon" onClick={this.handleSave} />;
+    }
     return (
       <div className="tile" style={style}>
         <div className="heading">
           <h2>Configuration</h2>
           <div className="iconGroup">
             <div className="small refresh icon" onClick={this.handleRefresh} />
-            <div className="small save icon" onClick={this.handleSave} />
+            {saveIcon}
           </div>
         </div>
         {this.props.config.map((optionGroup, optionGroupIndex) => (

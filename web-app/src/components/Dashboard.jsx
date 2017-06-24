@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
 import GraphView from './GraphView';
+import validateOptionInput from '../validator';
 
 class Dashboard extends Component {
   constructor(props) {
@@ -36,24 +37,24 @@ class Dashboard extends Component {
     this.socket.close();
   }
 
-  handleConfigChange(optionGroupIndex, optionIndex, value) {
+  handleConfigChange(optionGroupIndex, optionIndex, newValue) {
     const configCopy = this.state.config.slice();
-    const option = configCopy[optionGroupIndex].options[optionIndex];
-    let val = value;
-    if (option.type === 'int') {
-      if (val !== '') {
-        val = parseInt(val, 10);
-      }
-    } else if (option.type === 'double') {
-      if (val !== '' && val !== '.' && !/\d\.$/.test(val)) {
-        val = parseFloat(val);
-      }
+    const optionGroup = configCopy[optionGroupIndex];
+    const option = optionGroup.options[optionIndex];
+    const { valid, value } = validateOptionInput(option, newValue);
+    console.log(`[onChange]
+      ${option.name} (${option.type}):\t
+      ${JSON.stringify(option.value)} => ${JSON.stringify(value)}`);
+    option.value = value;
+    const name = option.name;
+    if (!optionGroup.invalid) {
+      optionGroup.invalid = [];
     }
-    if (isNaN(val)) {
-      val = option.value;
+    if (valid && optionGroup.invalid.indexOf(name) !== -1) {
+      optionGroup.invalid = optionGroup.invalid.filter(el => el !== name);
+    } else if (!valid && optionGroup.invalid.indexOf(name) === -1) {
+      optionGroup.invalid.push(name);
     }
-    console.log(`[onChange] ${option.name} (${option.type}):\t${option.value} => ${val}`);
-    option.value = val;
     this.setState({
       config: configCopy,
     });

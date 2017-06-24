@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Graph from './Graph';
+import Graph from '../graph';
 
 function shallowArrEquals(arr1, arr2) {
   return arr1.length === arr2.length && arr1.every(val => arr2.indexOf(val) !== -1);
@@ -41,7 +41,6 @@ class GraphView extends Component {
   }
 
   handleDocumentKeydown(evt) {
-    console.log(evt);
     if (evt.code === 'Space') {
       this.setState({
         paused: !this.state.paused,

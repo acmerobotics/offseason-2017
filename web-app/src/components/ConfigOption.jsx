@@ -1,15 +1,22 @@
 import React from 'react';
 
 const ConfigOption = ({ option, onChange }) => {
-  const changeHandler = (e) => {
-    if (option.type === 'boolean') {
-      onChange(e.target.checked);
-    } else if (option.type === 'enum') {
-      onChange(e.target.selectedIndex);
-    } else {
-      onChange(e.target.value);
+  const getValue = (e) => {
+    switch (option.type) {
+    case 'boolean':
+      return e.target.checked;
+    case 'enum':
+      return e.target.selectedIndex;
+    default:
+      return e.target.value;
     }
   };
+  const changeHandler = e => onChange(getValue(e));
+  const keyChangeHandler = key => (
+    e => onChange({
+      [key]: getValue(e),
+    })
+  );
   let input;
   switch (option.type) {
   case 'string':
@@ -32,6 +39,27 @@ const ConfigOption = ({ option, onChange }) => {
         onChange={changeHandler}>
         {option.values.map(v => (<option key={v} value={v}>{v}</option>))}
       </select>
+    );
+    break;
+  case 'pid':
+    input = (
+      <span>
+        p: <input
+          type="text"
+          size="8"
+          value={option.value.p}
+          onChange={keyChangeHandler('p')} />&nbsp;&nbsp;
+        i: <input
+          type="text"
+          size="8"
+          value={option.value.i}
+          onChange={keyChangeHandler('i')} />&nbsp;&nbsp;
+        d: <input
+          type="text"
+          size="8"
+          value={option.value.d}
+          onChange={keyChangeHandler('d')} />&nbsp;&nbsp;
+      </span>
     );
     break;
   default:

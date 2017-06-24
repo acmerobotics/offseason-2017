@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -82,7 +83,7 @@ public class OptionGroup {
                         option.add("value", new JsonPrimitive(f.get(null).toString()));
                         break;
                     default:
-                        if (type.getSuperclass().equals(Enum.class)) {
+                        if (type.isEnum()) {
                             option.add("type", new JsonPrimitive("enum"));
                             JsonArray values = new JsonArray();
                             List<?> enumConstants = Arrays.asList(type.getEnumConstants());
@@ -96,6 +97,14 @@ public class OptionGroup {
                             } else {
                                 option.add("value", new JsonPrimitive(enumConstants.indexOf(value)));
                             }
+                        } else if (type == PIDCoefficients.class) {
+                            option.add("type", new JsonPrimitive("pid"));
+                            PIDCoefficients coeffs = (PIDCoefficients) f.get(null);
+                            JsonObject value = new JsonObject();
+                            value.add("p", new JsonPrimitive(coeffs.p));
+                            value.add("i", new JsonPrimitive(coeffs.i));
+                            value.add("d", new JsonPrimitive(coeffs.d));
+                            option.add("value", value);
                         }
                         break;
                 }
@@ -133,6 +142,12 @@ public class OptionGroup {
                         int index = value.getAsInt();
                         f.set(null, f.getType().getEnumConstants()[index]);
                         break;
+                    case "pid":
+                        PIDCoefficients coeffs = (PIDCoefficients) f.get(null);
+                        JsonObject valueObj = value.getAsJsonObject();
+                        coeffs.p = valueObj.get("p").getAsDouble();
+                        coeffs.i = valueObj.get("i").getAsDouble();
+                        coeffs.d = valueObj.get("d").getAsDouble();
                 }
             }
             if (this.persist) {
