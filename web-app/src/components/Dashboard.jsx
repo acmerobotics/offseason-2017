@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
+import Heading from './Heading';
+import Header from './Header';
+import IconGroup from './IconGroup';
+import Icon from './Icon';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
 import GraphView from './GraphView';
+import Tile from './Tile';
+import TileGrid from './TileGrid';
 import validateOptionInput from '../validator';
 
 class Dashboard extends Component {
@@ -98,7 +104,7 @@ class Dashboard extends Component {
 
   connect() {
     // const host = process.env.NODE_ENV === 'development' ? '192.168.1.10' : '192.168.49.1';
-    const host = '192.168.1.10';
+    const host = '192.168.1.12';
     const port = 8000;
     this.socket = new WebSocket(`ws://${host}:${port}`);
     this.socket.onmessage = (evt) => {
@@ -126,26 +132,32 @@ class Dashboard extends Component {
   render() {
     return (
       <div>
-        <header>
-          <h1>FTC Dashboard</h1>
-          <div className="iconGroup">
-            <div
-              className={this.state.isConnected ? 'large icon wifi' : 'large icon no-wifi'} />
-          </div>
-        </header>
-        <div id="grid">
-          <TelemetryView
-            telemetry={this.state.telemetry}
-            onGraph={this.handleGraph} />
-          <GraphView
-            telemetry={this.state.telemetry}
-            keys={this.state.graphKeys} />
-          <ConfigView
-            config={this.state.config}
-            onChange={this.handleConfigChange}
-            onSave={this.handleConfigSave}
-            onRefresh={this.handleConfigRefresh} />
-        </div>
+        <Header>
+          <Heading text="FTC Dashboard" level={1}>
+            <IconGroup>
+              <Icon icon={this.state.isConnected ? 'wifi' : 'no-wifi'} size="large" />
+            </IconGroup>
+          </Heading>
+        </Header>
+        <TileGrid>
+          <Tile row="1 / span 2" col={1} hidden>
+            <GraphView
+              telemetry={this.state.telemetry}
+              keys={this.state.graphKeys} />
+          </Tile>
+          <Tile row={1} col={2}>
+            <ConfigView
+              config={this.state.config}
+              onChange={this.handleConfigChange}
+              onSave={this.handleConfigSave}
+              onRefresh={this.handleConfigRefresh} />
+          </Tile>
+          <Tile row={2} col={2}>
+            <TelemetryView
+              telemetry={this.state.telemetry}
+              onGraph={this.handleGraph} />
+          </Tile>
+        </TileGrid>
       </div>
     );
   }

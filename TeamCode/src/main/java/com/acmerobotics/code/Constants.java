@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 @Config("Constants")
 public class Constants {
-    public static int testNum = 3;
-    public static PIDCoefficients drivePid = new PIDCoefficients(0.22, 0.1, 0);
+    public static double maxSpeed = 2500;
+    public static double maxAccel = 5000;
+    public static int setpoint = 0;
+    public static PIDCoefficients testPid = new PIDCoefficients(0, 0, 0);
 }

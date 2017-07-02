@@ -8,7 +8,7 @@ import com.acmerobotics.library.dashboard.Persist;
  * @author Ryan
  */
 
-@Config("Config")
+//@Config("Config")
 @Persist("config")
 public class TestConfig {
     public static OpModeConfiguration.AllianceColor allianceColor;

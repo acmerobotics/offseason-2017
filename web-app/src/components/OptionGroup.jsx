@@ -1,13 +1,14 @@
 import React from 'react';
-import ConfigOption from './ConfigOption';
+import Option from './Option';
+import Heading from './Heading';
 
-const ConfigOptionGroup = ({ name, options, onChange }) => (
+const OptionGroup = ({ name, options, onChange }) => (
   <div>
-    <h3>{name}</h3>
+    <Heading level={3} text={name} />
     <table>
       <tbody>
         {options.map((option, optionIndex) => (
-          <ConfigOption
+          <Option
             key={optionIndex}
             option={option}
             onChange={value => onChange(optionIndex, value)} />
@@ -17,4 +18,4 @@ const ConfigOptionGroup = ({ name, options, onChange }) => (
   </div>
 );
 
-export default ConfigOptionGroup;
+export default OptionGroup;

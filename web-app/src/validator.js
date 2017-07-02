@@ -17,7 +17,7 @@ function validateInt(oldValue, newValue) {
 }
 
 function validateDouble(oldValue, newValue) {
-  if (newValue === '' || /^-?\d*\.([1-9]*0+)*$/.test(newValue)) {
+  if (newValue === '' || /^-0?$/.test(newValue) || /^-?\d*\.([1-9]*0+)*$/.test(newValue)) {
     return {
       valid: false,
       value: newValue,

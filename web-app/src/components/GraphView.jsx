@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Heading from './Heading';
 import Graph from '../graph';
 
 function shallowArrEquals(arr1, arr2) {
@@ -60,14 +61,9 @@ class GraphView extends Component {
   }
 
   render() {
-    const style = {
-      gridRow: '1 / span 2',
-      gridColumn: 1,
-      overflow: 'hidden',
-    };
     return (
-      <div className="tile" style={style}>
-        <h2>Graph</h2>
+      <div>
+        <Heading level={2} text="Graph" />
         <canvas ref={(c) => { this.canvas = c; }} width="1000" height="1000" />
       </div>
     );

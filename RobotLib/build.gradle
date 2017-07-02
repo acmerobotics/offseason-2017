@@ -40,6 +40,6 @@ dependencies {
     }
     compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M2'
     // already in a jar
-    compileOnly 'com.google.code.gson:gson:2.8.0'
+//    compileOnly 'com.google.code.gson:gson:2.8.0'
     testCompile 'junit:junit:4.12'
 }

@@ -7,7 +7,7 @@ const DEFAULT_OPTIONS = {
     '#ffa000',
   ],
   lineWidth: 2,
-  durationMs: 30000,
+  durationMs: 12000,
   padding: 15,
   keySpacing: 4,
   keyLineWidth: 12,
@@ -165,6 +165,9 @@ export default class Graph {
           min = val;
         }
       }
+    }
+    if (min === max) {
+      return getAxisScaling(min - 1, max + 1);
     }
     return getAxisScaling(min, max);
   }
