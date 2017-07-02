@@ -1,4 +1,8 @@
+# Offseason 2017
+Instructions for running the dashboard can be found in `web-app/README.md`.
+
 # ftc_app
+
 FTC Android Studio project to create FTC Robot Controller app.
 
 This is the FTC SDK that can be used to create an FTC Robot Controller app, with custom op modes.
@@ -94,7 +98,7 @@ Changes include:
     - Includes support for REV Control Hub (note that the REV Control Hub is not yet approved for FTC use).
     - Implements FTC Blocks programming support for REV Expansion Hub and sensor hardware.
     - Detects and alerts when I2C device disconnect.
-    
+
 **************************************************************************************
 
 Version 2.62 (built on 17.01.07)
@@ -115,7 +119,7 @@ Version 2.6 (released on 16.12.16)
      - fix isCalibrating issues.
   * Blocks Programming mode changes:
      - Blocks now ignores a device in the configuration xml if the name is empty. Other devices work in configuration work fine.
-     
+
 **************************************************************************************
 
 Version 2.5 (internal release on released on 16.12.13)
@@ -223,7 +227,7 @@ Version 2.30 (released on 16.10.05)
      - Fix for CompassSensor setMode block
   * Vuforia
      - Fix deadlock / make camera data available while Vuforia is running.
-     - Update to Vuforia 6.0.117 (recommended by Vuforia and Google to close security loophole). 
+     - Update to Vuforia 6.0.117 (recommended by Vuforia and Google to close security loophole).
   * Fix for autonomous 30 second timer bug (where timer was in effect, even though it appeared to have timed out).
   * opModeIsActive changes to allow cleanup after op mode is stopped (with enforced 2 second safety timeout).
   * Fix to avoid reading i2c twice.
@@ -351,7 +355,7 @@ Release 16.03.09
  * Added code to create log messages while waiting for LinearOpMode shutdown.
  * Fix so Wifi Direct Config activity will no longer launch multiple times.
  * Added the ability to specify an alternate i2c address in software for the Modern Robotics gyro.
- 
+
 **************************************************************************************
 
 Release 16.02.09
@@ -435,7 +439,7 @@ Release 15.11.04.001
  * Fix to keep references stable when updating gamepad.
  * For legacy Matrix motor/servo controllers removed necessity of appending "Motor" and "Servo" to controller names.
  * Updated HT color sensor driver to use constants from ModernRoboticsUsbLegacyModule class.
- * Updated MR color sensor driver to use constants from ModernRoboticsUsbDeviceInterfaceModule class. 
+ * Updated MR color sensor driver to use constants from ModernRoboticsUsbDeviceInterfaceModule class.
  * Correctly handle I2C Address change in all color sensors
  * Updated/cleaned up op modes.
   - Updated comments in LinearI2cAddressChange.java example op mode.
@@ -450,7 +454,7 @@ Release 15.11.04.001
 
 T. Eng
 November 5, 2015
- 
+
 **************************************************************************************
 
 Release 15.10.06.002
