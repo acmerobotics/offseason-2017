@@ -16,7 +16,6 @@ class Dashboard extends Component {
 
     this.state = {
       isConnected: false,
-      graphKeys: [],
       telemetry: [],
       config: [],
     };
@@ -25,7 +24,6 @@ class Dashboard extends Component {
     this.handleConfigSave = this.handleConfigSave.bind(this);
     this.handleMessage = this.handleMessage.bind(this);
     this.handleConfigRefresh = this.handleConfigRefresh.bind(this);
-    this.handleGraph = this.handleGraph.bind(this);
   }
 
   componentDidMount() {
@@ -74,18 +72,14 @@ class Dashboard extends Component {
   }
 
   handleConfigSave() {
-    this.socket.send(JSON.stringify({
-      type: 'update',
-      data: {
-        config: this.state.config,
-      },
-    }));
-  }
-
-  handleGraph(keys) {
-    this.setState({
-      graphKeys: keys,
-    });
+    if (this.state.config.every(v => !v.invalid || v.invalid.length === 0)) {
+      this.socket.send(JSON.stringify({
+        type: 'update',
+        data: {
+          config: this.state.config,
+        },
+      }));
+    }
   }
 
   handleMessage(msg) {
@@ -142,8 +136,7 @@ class Dashboard extends Component {
         <TileGrid>
           <Tile row="1 / span 2" col={1} hidden>
             <GraphView
-              telemetry={this.state.telemetry}
-              keys={this.state.graphKeys} />
+              telemetry={this.state.telemetry} />
           </Tile>
           <Tile row={1} col={2}>
             <ConfigView
@@ -154,8 +147,7 @@ class Dashboard extends Component {
           </Tile>
           <Tile row={2} col={2}>
             <TelemetryView
-              telemetry={this.state.telemetry}
-              onGraph={this.handleGraph} />
+              telemetry={this.state.telemetry} />
           </Tile>
         </TileGrid>
       </div>

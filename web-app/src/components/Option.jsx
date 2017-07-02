@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ConfigOption = ({ option, onChange }) => {
+const ConfigOption = ({ option, onChange, onSave }) => {
   const getValue = (e) => {
     switch (option.type) {
     case 'boolean':
@@ -17,6 +17,11 @@ const ConfigOption = ({ option, onChange }) => {
       [key]: getValue(e),
     })
   );
+  const keyPressHandler = (evt) => {
+    if (evt.key === 'Enter') {
+      onSave();
+    }
+  };
   let input;
   switch (option.type) {
   case 'string':
@@ -26,7 +31,8 @@ const ConfigOption = ({ option, onChange }) => {
       <input
         type="text"
         value={option.value}
-        onChange={changeHandler} />
+        onChange={changeHandler}
+        onKeyPress={keyPressHandler} />
     );
     break;
   case 'boolean':
@@ -48,17 +54,20 @@ const ConfigOption = ({ option, onChange }) => {
           type="text"
           size="8"
           value={option.value.p}
-          onChange={keyChangeHandler('p')} />&nbsp;&nbsp;
+          onChange={keyChangeHandler('p')}
+          onKeyPress={keyPressHandler} />&nbsp;&nbsp;
         i: <input
           type="text"
           size="8"
           value={option.value.i}
-          onChange={keyChangeHandler('i')} />&nbsp;&nbsp;
+          onChange={keyChangeHandler('i')}
+          onKeyPress={keyPressHandler} />&nbsp;&nbsp;
         d: <input
           type="text"
           size="8"
           value={option.value.d}
-          onChange={keyChangeHandler('d')} />&nbsp;&nbsp;
+          onChange={keyChangeHandler('d')}
+          onKeyPress={keyPressHandler} />&nbsp;&nbsp;
       </span>
     );
     break;

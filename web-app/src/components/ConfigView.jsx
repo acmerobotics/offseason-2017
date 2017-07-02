@@ -28,7 +28,7 @@ class ConfigView extends Component {
             <Icon icon="refresh" size="small" />
             {
               (this.props.config.every(v => !v.invalid || v.invalid.length === 0)) ?
-                <Icon icon="save" size="small" /> : undefined
+                <Icon icon="save" size="small" onClick={this.props.onSave} /> : undefined
             }
           </IconGroup>
         </Heading>
@@ -39,7 +39,8 @@ class ConfigView extends Component {
             options={optionGroup.options}
             onChange={
               (optionIndex, value) => this.props.onChange(optionGroupIndex, optionIndex, value)
-            } />
+            }
+            onSave={this.props.onSave} />
         ))}
       </div>
     );

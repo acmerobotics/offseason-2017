@@ -1,11 +1,12 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:400');
 body { font-family: "Roboto", sans-serif; margin: 0; padding: 0; font-size: 14px; }
-header { display: flex; justify-content: space-between; align-items: center; height: 38px; width: calc(100% - 16px); background-color: #2962ff; color: white; padding: 8px; }
-.tile-grid { display: grid; grid-template: 65% 35% / 65% 35%; width: 100%; height: calc(100vh - 54px); }
+header { width: calc(100% - 16px); background-color: #2962ff; color: white; padding: 8px; }
+header h1 { margin: 0; }
+.tile-grid { display: grid; grid-template: 65% 35% / 65% 35%; width: 100%; height: calc(100vh - 60px); }
 .tile { border: 1px solid #EEE; padding: 16px; overflow: auto; }
 .tile h2 { margin: 0; }
 .heading { display: flex; justify-content: space-between; align-items: center; }
-table { margin: 0; width: 100%; border-collapse: collapse; text-align: left; }
+table { margin: 0; border-collapse: collapse; text-align: left; }
 td { padding: 4px; }
 input { font-size: inherit; outline: none; }
 .icon-group { display: flex; align-items: center; order: 10; }
@@ -16,4 +17,5 @@ input { font-size: inherit; outline: none; }
 .wifi { background-image: url('icons/wifi.svg'); }
 .no-wifi { background-image: url('icons/wifi_off.svg'); }
 .chart { background-image: url('icons/chart.svg'); }
+.close { background-image: url('icons/close.svg'); }
 .refresh { background-image: url('icons/refresh.svg'); }

@@ -45,7 +45,7 @@ function niceNum(range, round) {
 
 // interesting algorithm (see http://erison.blogspot.nl/2011/07/algorithm-for-optimal-scaling-on-chart.html)
 function getAxisScaling(min, max) {
-  const maxTicks = 9;
+  const maxTicks = 7;
   const range = niceNum(max - min, false);
   const tickSpacing = niceNum(range / (maxTicks - 1), true);
   const niceMin = Math.floor(min / tickSpacing) * tickSpacing;
