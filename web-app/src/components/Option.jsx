@@ -20,6 +20,8 @@ const ConfigOption = ({ option, onChange, onSave }) => {
   const keyPressHandler = (evt) => {
     if (evt.key === 'Enter') {
       onSave();
+      evt.preventDefault();
+      evt.stopPropagation();
     }
   };
   let input;

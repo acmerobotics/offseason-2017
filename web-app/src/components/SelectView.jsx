@@ -5,12 +5,12 @@ class SelectView extends React.Component {
     super(props);
 
     this.state = {
-      selected: props.selected || [],
+      selected: this.props.selected || [],
     };
   }
 
   handleChange(evt, val) {
-    if (evt.target.value) {
+    if (evt.target.checked) {
       this.setState({
         selected: [...this.state.selected, val],
       }, () => this.props.onChange(this.state.selected));
@@ -34,7 +34,7 @@ class SelectView extends React.Component {
                     <input
                       type="checkbox"
                       onChange={evt => this.handleChange(evt, val)}
-                      value={this.state.selected.indexOf(val) !== -1} />
+                      checked={this.state.selected.indexOf(val) !== -1} />
                   </td>
                   <td>{val}</td>
                 </tr>
