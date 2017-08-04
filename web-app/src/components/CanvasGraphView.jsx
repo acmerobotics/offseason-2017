@@ -44,7 +44,7 @@ class CanvasGraphView extends React.Component {
   renderGraph() {
     if (!this.state.paused && this.canvas) {
       this.graph.render(0, 0,
-        Math.min(this.canvas.parentElement.parentElement.clientWidth - 50, 1000),
+        Math.min(this.canvas.parentElement.parentElement.clientWidth - 32, 1000),
         Math.min(this.canvas.parentElement.parentElement.clientHeight - 50, 1000));
       requestAnimationFrame(this.renderGraph);
     }
