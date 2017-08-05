@@ -5,6 +5,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.acmerobotics.library.dashboard.draw.Canvas;
+import com.acmerobotics.library.dashboard.message.Message;
+import com.acmerobotics.library.dashboard.message.MessageDeserializer;
+import com.acmerobotics.library.dashboard.message.MessageType;
+import com.acmerobotics.library.dashboard.message.UpdateMessageData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -18,13 +22,11 @@ import com.qualcomm.robotcore.util.ClassManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class RobotDashboard {
-	public static Gson gson = new GsonBuilder()
+	public static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(Message.class, new MessageDeserializer())
 			.create();
 
 	private static RobotDashboard dashboard;
@@ -40,7 +42,7 @@ public class RobotDashboard {
 
 	public static final String CONFIG_PREFS = "config";
 
-	private Map<String, JsonElement> telemetry;
+	private Telemetry telemetry;
 	private SharedPreferences prefs;
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
@@ -51,7 +53,7 @@ public class RobotDashboard {
 	private RobotDashboard(Context ctx, OpModeManagerImpl manager) {
 		prefs = ctx.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
-		telemetry = new HashMap<>();
+		telemetry = new Telemetry();
 		fieldOverlay = new Canvas();
 
 		this.manager = manager;
@@ -84,25 +86,19 @@ public class RobotDashboard {
 
 	}
 
-    public JsonElement getConfigJson() {
+    public JsonArray getConfigJson() {
 	    JsonArray arr = new JsonArray();
 	    for (OptionGroup group : optionGroups) {
 	        JsonObject obj = new JsonObject();
 	        obj.add("name", new JsonPrimitive(group.getName()));
-	        obj.add("options", group.getJson());
+	        obj.add("options", group.getAsJson());
 	        arr.add(obj);
         }
         return arr;
     }
 
-    public JsonElement getFieldOverlayJson() {
-		return gson.toJsonTree(fieldOverlay.getInstructions());
-	}
-
-	public JsonObject getFieldOverlayUpdateMessage() {
-		JsonObject data = new JsonObject();
-		data.add("field", getFieldOverlayJson());
-		return getMessage("update", data);
+	public Message getFieldOverlayUpdateMessage() {
+	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().fieldOverlay(fieldOverlay).build());
 	}
 
     public void updateConfigWithJson(JsonElement configJson) {
@@ -119,27 +115,12 @@ public class RobotDashboard {
         return msg;
     }
 
-    public JsonObject getConfigUpdateMessage() {
-	    JsonObject data = new JsonObject();
-	    data.add("config", getConfigJson());
-	    return getMessage("update", data);
+    public Message getConfigUpdateMessage() {
+	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().config(getConfigJson()).build());
     }
 
-	private JsonElement getTelemetryJson() {
-		JsonArray arr = new JsonArray();
-		for (Entry<String, JsonElement> line : telemetry.entrySet()) {
-			JsonObject obj = new JsonObject();
-			obj.add("name", new JsonPrimitive(line.getKey()));
-			obj.add("value", line.getValue());
-			arr.add(obj);
-		}
-		return arr;
-	}
-
-	private JsonObject getTelemetryUpdateMessage() {
-		JsonObject data = new JsonObject();
-		data.add("telemetry", getTelemetryJson());
-		return getMessage("update", data);
+	private Message getTelemetryUpdateMessage() {
+		return new Message(MessageType.UPDATE, UpdateMessageData.builder().telemetry(telemetry).build());
 	}
 
 	public void addTelemetry(String key, String value) {
@@ -159,11 +140,12 @@ public class RobotDashboard {
     }
 
 	public void addTelemetry(String key, JsonElement element) {
-		telemetry.put(key, element);
+		telemetry.addEntry(new Telemetry.Entry(key, element));
 	}
 
 	public void updateTelemetry() {
-	    sendAll(getTelemetryUpdateMessage().toString());
+	    sendAll(getTelemetryUpdateMessage());
+	    telemetry.clear();
     }
 
     public Canvas getFieldOverlay() {
@@ -171,50 +153,46 @@ public class RobotDashboard {
 	}
 
 	public void drawOverlay() {
-		sendAll(getFieldOverlayUpdateMessage().toString());
+		sendAll(getFieldOverlayUpdateMessage());
 		fieldOverlay.clear();
 	}
 
-	public synchronized void sendAll(String msg) {
+	public synchronized void sendAll(Message message) {
 		for (RobotWebSocket ws : sockets) {
-			send(ws, msg);
-		}
-	}
-
-	public synchronized void send(RobotWebSocket ws, String msg) {
-		try {
-			ws.send(msg);
-		} catch (IOException e) {
-			e.printStackTrace();
+			ws.send(message);
 		}
 	}
 
 	public synchronized void addSocket(RobotWebSocket socket) {
 		sockets.add(socket);
-		send(socket, getConfigUpdateMessage().toString());
+		socket.send(getConfigUpdateMessage());
 	}
 
 	public synchronized void removeSocket(RobotWebSocket socket) {
 		sockets.remove(socket);
 	}
 
-	public synchronized void onMessage(RobotWebSocket socket, JsonObject msg) {
-		System.out.println(msg.toString());
-		String type = msg.get("type").getAsString();
-		if (type.equals("get")) {
-			String data = msg.get("data").getAsString();
-			if (data.equals("config")) {
-				send(socket, getConfigUpdateMessage().toString());
-			}
-		} else if (type.equals("update")) {
-			JsonObject data = msg.get("data").getAsJsonObject();
-			if (data.has("config")) {
-			    updateConfigWithJson(data.get("config"));
-			}
-		} else {
-			Log.i("Dashboard", String.format("unknown message recv'd: '%s'", type));
-			Log.i("Dashboard", msg.toString());
-		}
+	public synchronized void onMessage(RobotWebSocket socket, Message msg) {
+        switch(msg.getType()) {
+            case GET: {
+                String data = (String) msg.getData();
+                if (data.equals("config")) {
+                    socket.send(getConfigUpdateMessage());
+                } else if (data.equals("telemetry")) {
+                    socket.send(getTelemetryUpdateMessage());
+                }
+                break;
+            }
+            case UPDATE: {
+                UpdateMessageData data = (UpdateMessageData) msg.getData();
+                updateConfigWithJson(data.getConfig());
+                break;
+            }
+            default:
+                Log.i("Dashboard", String.format("unknown message recv'd: '%s'", msg.getType()));
+                Log.i("Dashboard", msg.toString());
+                break;
+        }
 	}
 
 	public void stop() {

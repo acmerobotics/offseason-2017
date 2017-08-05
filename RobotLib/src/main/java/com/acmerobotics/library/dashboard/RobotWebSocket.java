@@ -2,7 +2,8 @@ package com.acmerobotics.library.dashboard;
 
 import android.util.Log;
 
-import com.google.gson.JsonObject;
+import com.acmerobotics.library.dashboard.message.Message;
+import com.acmerobotics.library.dashboard.message.MessageType;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
@@ -37,14 +38,11 @@ public class RobotWebSocket extends WebSocket {
 
 	@Override
 	protected void onMessage(WebSocketFrame message) {
-		JsonObject msg = parser.parse(message.getTextPayload()).getAsJsonObject();
-		if (msg.get("type").getAsString().equals("ping")) {
-			try {
-				send("{\"type\":\"pong\"}");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		Message msg = RobotDashboard.GSON.fromJson(message.getTextPayload(), Message.class);
+		if (msg.getType() == MessageType.PING) {
+			send(new Message(MessageType.PONG));
 		} else {
+			Log.i("DashboardMessage", "[RECV] " + message.getTextPayload());
 			dashboard.onMessage(this, msg);
 		}
 	}
@@ -57,6 +55,18 @@ public class RobotWebSocket extends WebSocket {
 	@Override
 	protected void onException(IOException exception) {
 		
+	}
+
+	public void send(Message message) {
+		try {
+			String messageStr = RobotDashboard.GSON.toJson(message);
+			if (message.getType() != MessageType.PONG) {
+				Log.i("DashboardMessage", "[SENT] " + messageStr);
+			}
+			send(messageStr);
+		} catch (IOException e) {
+			Log.e("RobotWebSocket", e.getMessage() + ": " + e);
+		}
 	}
 	
 }

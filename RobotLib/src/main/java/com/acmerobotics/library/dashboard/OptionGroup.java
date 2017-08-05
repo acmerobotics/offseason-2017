@@ -1,6 +1,7 @@
 package com.acmerobotics.library.dashboard;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -56,7 +57,7 @@ public class OptionGroup {
         return name;
     }
 
-    public JsonElement getJson() {
+    public JsonElement getAsJson() {
         try {
             JsonObject obj = new JsonObject();
             obj.add("name", new JsonPrimitive(name));
@@ -125,7 +126,8 @@ public class OptionGroup {
                 JsonObject option = options.get(i).getAsJsonObject();
                 Field f = klass.getField(option.get("name").getAsString());
                 JsonElement value = option.get("value");
-                switch (option.get("type").getAsString()) {
+                String type = option.get("type").getAsString();
+                switch (type) {
                     case "boolean":
                         f.setBoolean(null, value.getAsBoolean());
                         break;
@@ -148,6 +150,9 @@ public class OptionGroup {
                         coeffs.p = valueObj.get("p").getAsDouble();
                         coeffs.i = valueObj.get("i").getAsDouble();
                         coeffs.d = valueObj.get("d").getAsDouble();
+                        break;
+                    default:
+                        Log.e("OptionGroup", "Unknown type received: " + type);
                 }
             }
             if (this.persist) {

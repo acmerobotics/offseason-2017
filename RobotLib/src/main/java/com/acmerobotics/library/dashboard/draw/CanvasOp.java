@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by ryanbrott on 8/4/17.
  */
 
-public abstract class CanvasInstruction {
+public abstract class CanvasOp {
     public enum Type {
         @SerializedName("circle")
         CIRCLE,
@@ -29,7 +29,7 @@ public abstract class CanvasInstruction {
 
     private Type type;
 
-    public CanvasInstruction(Type type) {
+    public CanvasOp(Type type) {
         this.type = type;
     }
 }

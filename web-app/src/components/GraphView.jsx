@@ -45,7 +45,7 @@ class GraphView extends Component {
             :
             (
               <SelectView
-                arr={this.props.telemetry.map(el => el.name)}
+                arr={this.props.telemetry.entries.map(el => el.name)}
                 exclude={['time']}
                 onChange={selected => this.setState({ keys: selected })} />
             )

@@ -8,30 +8,30 @@ import java.util.List;
  */
 
 public class Canvas {
-    private List<CanvasInstruction> instructions;
+    private List<CanvasOp> ops;
 
     public Canvas() {
-        instructions = new ArrayList<>();
+        ops = new ArrayList<>();
     }
 
     public void strokeCircle(double x, double y, double radius) {
-        instructions.add(new Circle(x, y, radius, true));
+        ops.add(new Circle(x, y, radius, true));
     }
 
     public void fillCircle(double x, double y, double radius) {
-        instructions.add(new Circle(x, y, radius, false));
+        ops.add(new Circle(x, y, radius, false));
     }
 
     public void strokePolygon(double[] xPoints, double[] yPoints) {
-        instructions.add(new Polygon(xPoints, yPoints, true));
+        ops.add(new Polygon(xPoints, yPoints, true));
     }
 
     public void fillPolygon(double[] xPoints, double[] yPoints) {
-        instructions.add(new Polygon(xPoints, yPoints, false));
+        ops.add(new Polygon(xPoints, yPoints, false));
     }
 
     public void strokePolyline(double[] xPoints, double[] yPoints) {
-        instructions.add(new Polyline(xPoints, yPoints));
+        ops.add(new Polyline(xPoints, yPoints));
     }
 
     public void strokeLine(double x1, double y1, double x2, double y2) {
@@ -47,22 +47,22 @@ public class Canvas {
     }
 
     public void setFill(String color) {
-        instructions.add(new Fill(color));
+        ops.add(new Fill(color));
     }
 
     public void setStroke(String color) {
-        instructions.add(new Stroke(color));
+        ops.add(new Stroke(color));
     }
 
     public void setStrokeWidth(int width) {
-        instructions.add(new StrokeWidth(width));
+        ops.add(new StrokeWidth(width));
     }
 
-    public List<CanvasInstruction> getInstructions() {
-        return instructions;
+    public List<CanvasOp> getOperations() {
+        return ops;
     }
 
     public void clear() {
-        this.instructions.clear();
+        this.ops.clear();
     }
 }

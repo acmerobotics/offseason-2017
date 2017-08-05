@@ -10,7 +10,7 @@ const truncate = (str, len) => {
 };
 
 const TelemetryView = ({ telemetry }) => {
-  const tableRows = telemetry.map(item => (
+  const tableRows = telemetry.entries.map(item => (
     <tr key={item.name}>
       <td>{item.name}</td>
       <td>{truncate(item.value, 15)}</td>

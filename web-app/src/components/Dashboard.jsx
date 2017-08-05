@@ -17,9 +17,13 @@ class Dashboard extends Component {
 
     this.state = {
       isConnected: false,
-      telemetry: [],
-      field: [],
+      telemetry: {
+        entries: [],
+      },
       config: [],
+      fieldOverlay: {
+        ops: [],
+      },
     };
 
     this.handleConfigChange = this.handleConfigChange.bind(this);
@@ -67,7 +71,6 @@ class Dashboard extends Component {
   }
 
   handleConfigRefresh() {
-    console.log('refreshing');
     this.socket.send(JSON.stringify({
       type: 'get',
       data: 'config',
@@ -100,7 +103,6 @@ class Dashboard extends Component {
   }
 
   connect() {
-    // const host = process.env.NODE_ENV === 'development' ? '192.168.1.10' : '192.168.49.1';
     const host = '192.168.1.10';
     const port = 8000;
     this.socket = new WebSocket(`ws://${host}:${port}`);
@@ -138,8 +140,10 @@ class Dashboard extends Component {
         </Header>
         <TileGrid>
           <Tile row="1 / span 2" col={1} hidden>
-            <FieldView
-              overlay={this.state.field} />
+            {/* <FieldView
+              overlay={this.state.fieldOverlay} /> */}
+            <GraphView
+              telemetry={this.state.telemetry} />
           </Tile>
           <Tile row={1} col={2}>
             <ConfigView

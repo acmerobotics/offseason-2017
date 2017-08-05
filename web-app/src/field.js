@@ -13,7 +13,9 @@ export default class Field {
     this.ctx = canvas.getContext('2d');
     this.options = DEFAULT_OPTIONS;
     Object.assign(this.options, options || {});
-    this.overlay = [];
+    this.overlay = {
+      ops: [],
+    };
   }
 
   render(x, y, width, height) {
@@ -56,24 +58,24 @@ export default class Field {
   }
 
   renderOverlay(x, y, width, height) {
-    this.overlay.forEach((element) => {
-      switch (element.type) {
+    this.overlay.ops.forEach((op) => {
+      switch (op.type) {
       case 'fill':
-        this.ctx.fillStyle = element.color;
+        this.ctx.fillStyle = op.color;
         break;
       case 'stroke':
-        this.ctx.strokeStyle = element.color;
+        this.ctx.strokeStyle = op.color;
         break;
       case 'strokeWidth':
-        this.ctx.lineWidth = element.width;
+        this.ctx.lineWidth = op.width;
         break;
       case 'circle':
         this.ctx.beginPath();
         this.ctx.arc(
-          scale(element.x, 0, 1, x, width + x),
-          scale(element.y, 0, 1, y, height + y),
-          element.radius, 0, 2 * Math.PI);
-        if (element.stroke) {
+          scale(op.x, 0, 1, x, width + x),
+          scale(op.y, 0, 1, y, height + y),
+          op.radius, 0, 2 * Math.PI);
+        if (op.stroke) {
           this.ctx.stroke();
         } else {
           this.ctx.fill();
@@ -81,7 +83,7 @@ export default class Field {
         break;
       case 'polygon': {
         this.ctx.beginPath();
-        const { xPoints, yPoints, stroke } = element;
+        const { xPoints, yPoints, stroke } = op;
         this.ctx.moveTo(scale(xPoints[0], 0, 1, x, width + x),
           scale(yPoints[0], 0, 1, y, height + y));
         for (let i = 1; i < xPoints.length; i += 1) {
@@ -98,7 +100,7 @@ export default class Field {
       }
       case 'polyline': {
         this.ctx.beginPath();
-        const { xPoints, yPoints } = element;
+        const { xPoints, yPoints } = op;
         this.ctx.moveTo(scale(xPoints[0], 0, 1, x, width + x),
           scale(yPoints[0], 0, 1, y, height + y));
         for (let i = 1; i < xPoints.length; i += 1) {
@@ -109,8 +111,8 @@ export default class Field {
         break;
       }
       default:
-        console.log(`unknown type: ${element.type}`);
-        console.log(element);
+        console.log(`unknown op: ${op.type}`);
+        console.log(op);
       }
     });
   }

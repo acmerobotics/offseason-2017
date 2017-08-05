@@ -4,7 +4,7 @@ package com.acmerobotics.library.dashboard.draw;
  * Created by ryanbrott on 8/4/17.
  */
 
-public class Circle extends CanvasInstruction {
+public class Circle extends CanvasOp {
     private double x, y, radius;
     private boolean stroke;
 
