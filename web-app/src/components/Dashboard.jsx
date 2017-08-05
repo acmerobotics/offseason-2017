@@ -6,6 +6,7 @@ import Icon from './Icon';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
 import GraphView from './GraphView';
+import FieldView from './FieldView';
 import Tile from './Tile';
 import TileGrid from './TileGrid';
 import validateOptionInput from '../validator';
@@ -17,6 +18,7 @@ class Dashboard extends Component {
     this.state = {
       isConnected: false,
       telemetry: [],
+      field: [],
       config: [],
     };
 
@@ -65,6 +67,7 @@ class Dashboard extends Component {
   }
 
   handleConfigRefresh() {
+    console.log('refreshing');
     this.socket.send(JSON.stringify({
       type: 'get',
       data: 'config',
@@ -135,8 +138,8 @@ class Dashboard extends Component {
         </Header>
         <TileGrid>
           <Tile row="1 / span 2" col={1} hidden>
-            <GraphView
-              telemetry={this.state.telemetry} />
+            <FieldView
+              overlay={this.state.field} />
           </Tile>
           <Tile row={1} col={2}>
             <ConfigView

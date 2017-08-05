@@ -4,16 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.acmerobotics.library.dashboard.draw.Canvas;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerNotifier;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeMeta;
 import com.qualcomm.robotcore.util.ClassFilter;
 import com.qualcomm.robotcore.util.ClassManager;
 
@@ -25,6 +24,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class RobotDashboard {
+	public static Gson gson = new GsonBuilder()
+			.create();
 
 	private static RobotDashboard dashboard;
 
@@ -44,12 +45,14 @@ public class RobotDashboard {
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
     private List<OptionGroup> optionGroups;
+	private Canvas fieldOverlay;
     private OpModeManagerImpl manager;
 	
 	private RobotDashboard(Context ctx, OpModeManagerImpl manager) {
 		prefs = ctx.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
 		telemetry = new HashMap<>();
+		fieldOverlay = new Canvas();
 
 		this.manager = manager;
 //		manager.registerListener(this);
@@ -91,6 +94,16 @@ public class RobotDashboard {
         }
         return arr;
     }
+
+    public JsonElement getFieldOverlayJson() {
+		return gson.toJsonTree(fieldOverlay.getInstructions());
+	}
+
+	public JsonObject getFieldOverlayUpdateMessage() {
+		JsonObject data = new JsonObject();
+		data.add("field", getFieldOverlayJson());
+		return getMessage("update", data);
+	}
 
     public void updateConfigWithJson(JsonElement configJson) {
         JsonArray arr = configJson.getAsJsonArray();
@@ -152,6 +165,15 @@ public class RobotDashboard {
 	public void updateTelemetry() {
 	    sendAll(getTelemetryUpdateMessage().toString());
     }
+
+    public Canvas getFieldOverlay() {
+		return fieldOverlay;
+	}
+
+	public void drawOverlay() {
+		sendAll(getFieldOverlayUpdateMessage().toString());
+		fieldOverlay.clear();
+	}
 
 	public synchronized void sendAll(String msg) {
 		for (RobotWebSocket ws : sockets) {
