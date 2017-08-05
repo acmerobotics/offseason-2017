@@ -9,7 +9,7 @@ import GraphView from './GraphView';
 import FieldView from './FieldView';
 import Tile from './Tile';
 import TileGrid from './TileGrid';
-import validateOptionInput from '../validator';
+import validateOptionInput from '../util/validator';
 
 class Dashboard extends Component {
   constructor(props) {
@@ -17,6 +17,7 @@ class Dashboard extends Component {
 
     this.state = {
       isConnected: false,
+      pingTime: 0,
       telemetry: {
         entries: [],
       },
@@ -91,9 +92,7 @@ class Dashboard extends Component {
   handleMessage(msg) {
     if (msg.type === 'pong') {
       const pingTime = Date.now() - this.lastPingTime;
-      if (pingTime > 250) {
-        console.warn(`WARNING! Slow ping time (${pingTime}ms)`);
-      }
+      this.setState({ pingTime });
     } else if (msg.type === 'update') {
       this.setState(msg.data);
     } else {
@@ -134,6 +133,11 @@ class Dashboard extends Component {
         <Header>
           <Heading text="FTC Dashboard" level={1}>
             <IconGroup>
+              {
+                this.state.isConnected ?
+                  <p>{this.state.pingTime}ms&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                  : null
+              }
               <Icon icon={this.state.isConnected ? 'wifi' : 'no-wifi'} size="large" />
             </IconGroup>
           </Heading>

@@ -1,5 +1,5 @@
 import React from 'react';
-import Graph from '../graph';
+import Graph from './Graph';
 
 class GraphCanvas extends React.Component {
   constructor(props) {

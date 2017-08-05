@@ -1,5 +1,5 @@
 import React from 'react';
-import Field from '../field';
+import Field from './Field';
 import Heading from './Heading';
 
 class FieldView extends React.Component {
