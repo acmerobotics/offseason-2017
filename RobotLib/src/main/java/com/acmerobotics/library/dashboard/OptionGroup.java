@@ -114,7 +114,7 @@ public class OptionGroup {
             obj.add("options", options);
             return options;
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            Log.w(RobotDashboard.TAG, e);
             return null;
         }
     }
@@ -152,17 +152,15 @@ public class OptionGroup {
                         coeffs.d = valueObj.get("d").getAsDouble();
                         break;
                     default:
-                        Log.e("OptionGroup", "Unknown type received: " + type);
+                        Log.w(RobotDashboard.TAG, "Unknown type received: " + type);
                 }
             }
             if (this.persist) {
                 editor.putString(this.prefKey, json.toString());
                 editor.commit();
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            Log.w(RobotDashboard.TAG, e);
         }
     }
 }

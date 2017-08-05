@@ -44,15 +44,18 @@ public class BasicOpMode extends OpMode implements SensorEventListener {
         dashboard.addTelemetry("third", lastReading[2]);
         dashboard.updateTelemetry();
 
+//        overlay.setFill("blue");
+//        overlay.setStroke("goldenrod");
+//        overlay.setStrokeWidth(3);
+//        overlay.fillRect(0.4, 0.4, 0.2, 0.2);
+//        overlay.strokeCircle((System.currentTimeMillis() % Constants.maxSpeed) / Constants.maxSpeed, 0.5, 10);
+//        overlay.setFill("yellow");
+//        overlay.fillRect(0.45, 0.45, 0.1, 0.1);
+//        overlay.setStroke("red");
+//        overlay.strokeLine(0, 0, 1, 1);
+
         overlay.setFill("blue");
-        overlay.setStroke("goldenrod");
-        overlay.setStrokeWidth(3);
-        overlay.fillRect(0.4, 0.4, 0.2, 0.2);
-        overlay.strokeCircle((System.currentTimeMillis() % Constants.maxSpeed) / Constants.maxSpeed, 0.5, 10);
-        overlay.setFill("yellow");
-        overlay.fillRect(0.45, 0.45, 0.1, 0.1);
-        overlay.setStroke("red");
-        overlay.strokeLine(0, 0, 1, 1);
+        overlay.fillCircle(0.5 * lastReading[0] + 0.5, 0.5 * lastReading[1] + 0.5, 5);
         dashboard.drawOverlay();
 
         try {

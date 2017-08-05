@@ -16,7 +16,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManagerImpl;
 import com.qualcomm.robotcore.util.ClassFilter;
 import com.qualcomm.robotcore.util.ClassManager;
 
@@ -25,22 +24,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RobotDashboard {
+    public static final String TAG = "RobotDashboard";
+	public static final String CONFIG_PREFS = "config";
+
 	public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Message.class, new MessageDeserializer())
 			.create();
 
 	private static RobotDashboard dashboard;
 
+	// TODO I'm sure there's a better way to make a static singleton
 	public static RobotDashboard open(Context ctx, EventLoop eventLoop) {
-		dashboard = new RobotDashboard(ctx, eventLoop.getOpModeManager());
+		// the eventLoop can be used to get the op mode manager and monitor op mode activity
+		dashboard = new RobotDashboard(ctx);
 		return dashboard;
 	}
 
 	public static RobotDashboard getInstance() {
 		return dashboard;
-	}
-
-	public static final String CONFIG_PREFS = "config";
+	};
 
 	private Telemetry telemetry;
 	private SharedPreferences prefs;
@@ -48,16 +50,12 @@ public class RobotDashboard {
 	private RobotWebSocketServer server;
     private List<OptionGroup> optionGroups;
 	private Canvas fieldOverlay;
-    private OpModeManagerImpl manager;
 	
-	private RobotDashboard(Context ctx, OpModeManagerImpl manager) {
+	private RobotDashboard(Context ctx) {
 		prefs = ctx.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
 		telemetry = new Telemetry();
 		fieldOverlay = new Canvas();
-
-		this.manager = manager;
-//		manager.registerListener(this);
 
 		optionGroups = new ArrayList<>();
 		try {
@@ -74,7 +72,7 @@ public class RobotDashboard {
             });
             classManager.processAllClasses();
         } catch (IOException e) {
-            Log.e("DashboardConfig", e.getMessage());
+			Log.w(TAG, e);
         }
 
 		server = new RobotWebSocketServer(this);
@@ -83,8 +81,41 @@ public class RobotDashboard {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
+
+    public void addTelemetry(String key, String value) {
+        addTelemetry(key, new JsonPrimitive(value));
+    }
+
+    public void addTelemetry(String key, boolean value) {
+        addTelemetry(key, new JsonPrimitive(value));
+    }
+
+    public void addTelemetry(String key, int value) {
+        addTelemetry(key, new JsonPrimitive(value));
+    }
+
+    public void addTelemetry(String key, double value) {
+        addTelemetry(key, new JsonPrimitive(value));
+    }
+
+    public void addTelemetry(String key, JsonElement element) {
+        telemetry.addEntry(new Telemetry.Entry(key, element));
+    }
+
+    public void updateTelemetry() {
+        sendAll(getTelemetryUpdateMessage());
+        telemetry.clear();
+    }
+
+    public Canvas getFieldOverlay() {
+        return fieldOverlay;
+    }
+
+    public void drawOverlay() {
+        sendAll(getFieldOverlayUpdateMessage());
+        fieldOverlay.clear();
+    }
 
     public JsonArray getConfigJson() {
 	    JsonArray arr = new JsonArray();
@@ -97,23 +128,16 @@ public class RobotDashboard {
         return arr;
     }
 
-	public Message getFieldOverlayUpdateMessage() {
-	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().fieldOverlay(fieldOverlay).build());
-	}
-
     public void updateConfigWithJson(JsonElement configJson) {
         JsonArray arr = configJson.getAsJsonArray();
-	    for (int i = 0; i < arr.size(); i++) {
-	    	optionGroups.get(i).updateFromJson(arr.get(i));
+        for (int i = 0; i < arr.size(); i++) {
+            optionGroups.get(i).updateFromJson(arr.get(i));
         }
     }
 
-    public static JsonObject getMessage(String type, JsonObject data) {
-        JsonObject msg = new JsonObject();
-        msg.add("type", new JsonPrimitive(type));
-        msg.add("data", data);
-        return msg;
-    }
+	public Message getFieldOverlayUpdateMessage() {
+	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().fieldOverlay(fieldOverlay).build());
+	}
 
     public Message getConfigUpdateMessage() {
 	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().config(getConfigJson()).build());
@@ -121,40 +145,6 @@ public class RobotDashboard {
 
 	private Message getTelemetryUpdateMessage() {
 		return new Message(MessageType.UPDATE, UpdateMessageData.builder().telemetry(telemetry).build());
-	}
-
-	public void addTelemetry(String key, String value) {
-		addTelemetry(key, new JsonPrimitive(value));
-	}
-
-	public void addTelemetry(String key, boolean value) {
-	    addTelemetry(key, new JsonPrimitive(value));
-    }
-
-	public void addTelemetry(String key, int value) {
-	    addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, double value) {
-	    addTelemetry(key, new JsonPrimitive(value));
-    }
-
-	public void addTelemetry(String key, JsonElement element) {
-		telemetry.addEntry(new Telemetry.Entry(key, element));
-	}
-
-	public void updateTelemetry() {
-	    sendAll(getTelemetryUpdateMessage());
-	    telemetry.clear();
-    }
-
-    public Canvas getFieldOverlay() {
-		return fieldOverlay;
-	}
-
-	public void drawOverlay() {
-		sendAll(getFieldOverlayUpdateMessage());
-		fieldOverlay.clear();
 	}
 
 	public synchronized void sendAll(Message message) {
@@ -189,8 +179,8 @@ public class RobotDashboard {
                 break;
             }
             default:
-                Log.i("Dashboard", String.format("unknown message recv'd: '%s'", msg.getType()));
-                Log.i("Dashboard", msg.toString());
+                Log.w(TAG, String.format("unknown message recv'd: '%s'", msg.getType()));
+                Log.w(TAG, msg.toString());
                 break;
         }
 	}

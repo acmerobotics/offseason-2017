@@ -140,10 +140,10 @@ class Dashboard extends Component {
         </Header>
         <TileGrid>
           <Tile row="1 / span 2" col={1} hidden>
-            {/* <FieldView
-              overlay={this.state.fieldOverlay} /> */}
-            <GraphView
-              telemetry={this.state.telemetry} />
+            <FieldView
+              overlay={this.state.fieldOverlay} />
+            {/* <GraphView
+              telemetry={this.state.telemetry} /> */}
           </Tile>
           <Tile row={1} col={2}>
             <ConfigView

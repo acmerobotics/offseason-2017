@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.acmerobotics.library.dashboard.message.Message;
 import com.acmerobotics.library.dashboard.message.MessageType;
-import com.google.gson.JsonParser;
 
 import java.io.IOException;
 
@@ -15,24 +14,22 @@ import fi.iki.elonen.NanoWSD.WebSocketFrame.CloseCode;
 
 public class RobotWebSocket extends WebSocket {
 	
-	private JsonParser parser;
 	private RobotDashboard dashboard;
 
 	public RobotWebSocket(IHTTPSession handshakeRequest, RobotDashboard dash) {
 		super(handshakeRequest);
-		parser = new JsonParser();
 		dashboard = dash;
 	}
 
 	@Override
 	protected void onOpen() {
-		Log.i("Dashboard", "[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+		Log.i(RobotDashboard.TAG, "[OPEN]\t" + this.getHandshakeRequest().getRemoteIpAddress());
 		dashboard.addSocket(this);
 	}
 
 	@Override
 	protected void onClose(CloseCode code, String reason, boolean initiatedByRemote) {
-		Log.i("Dashboard", "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
+		Log.i(RobotDashboard.TAG, "[CLOSE]\t" + this.getHandshakeRequest().getRemoteIpAddress());
 		dashboard.removeSocket(this);
 	}
 
@@ -42,7 +39,7 @@ public class RobotWebSocket extends WebSocket {
 		if (msg.getType() == MessageType.PING) {
 			send(new Message(MessageType.PONG));
 		} else {
-			Log.i("DashboardMessage", "[RECV] " + message.getTextPayload());
+			Log.i(RobotDashboard.TAG, "[RECV] " + message.getTextPayload());
 			dashboard.onMessage(this, msg);
 		}
 	}
@@ -61,11 +58,11 @@ public class RobotWebSocket extends WebSocket {
 		try {
 			String messageStr = RobotDashboard.GSON.toJson(message);
 			if (message.getType() != MessageType.PONG) {
-				Log.i("DashboardMessage", "[SENT] " + messageStr);
+				Log.i(RobotDashboard.TAG, "[SENT] " + messageStr);
 			}
 			send(messageStr);
 		} catch (IOException e) {
-			Log.e("RobotWebSocket", e.getMessage() + ": " + e);
+			Log.w(RobotDashboard.TAG, e);
 		}
 	}
 	
