@@ -1,7 +1,7 @@
 import React from 'react';
 import Graph from '../graph';
 
-class CanvasGraphView extends React.Component {
+class GraphCanvas extends React.Component {
   constructor(props) {
     super(props);
 
@@ -55,4 +55,4 @@ class CanvasGraphView extends React.Component {
   }
 }
 
-export default CanvasGraphView;
+export default GraphCanvas;
