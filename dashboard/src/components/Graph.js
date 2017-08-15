@@ -19,7 +19,7 @@ const DEFAULT_OPTIONS = {
 
 function niceNum(range, round) {
   const exponent = Math.floor(Math.log10(range));
-  const fraction = range / (10 ** exponent);
+  const fraction = range / Math.pow(10, exponent);
   let niceFraction;
   if (round) {
     if (fraction < 1.5) {
@@ -40,7 +40,7 @@ function niceNum(range, round) {
   } else {
     niceFraction = 10;
   }
-  return niceFraction * (10 ** exponent);
+  return niceFraction * Math.pow(10, exponent);
 }
 
 // interesting algorithm (see http://erison.blogspot.nl/2011/07/algorithm-for-optimal-scaling-on-chart.html)
@@ -209,16 +209,9 @@ export default class Graph {
   renderGraph(x, y, width, height) {
     const o = this.options;
     if (this.datasets.length === 0 || this.datasets[0].data.length === 0) {
-      // this.ctx.fillStyle = 'rgb(200, 200, 200)';
-      // this.ctx.fillRect(x, y, width, height);
-      //
-      // this.ctx.font = `${5 * o.fontSize}px sans-serif`;
-      // this.ctx.textAlign = 'center';
-      // this.ctx.textBaseline = 'middle';
-      // this.ctx.fillStyle = o.textColor;
-      // this.ctx.fillText('No Data', x + width / 2, y + height / 2);
       return;
     }
+
     // remove old points
     const now = Date.now();
     while ((now - this.time[0]) > (o.durationMs + 250)) {

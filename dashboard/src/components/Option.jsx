@@ -1,6 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const ConfigOption = ({ option, onChange, onSave }) => {
+const Option = ({ option, onChange, onSave }) => {
   const getValue = (e) => {
     switch (option.type) {
     case 'boolean':
@@ -85,4 +86,13 @@ const ConfigOption = ({ option, onChange, onSave }) => {
   );
 };
 
-export default ConfigOption;
+Option.propTypes = {
+  option: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    value: PropTypes.any.isRequired
+  }).isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired
+};
+
+export default Option;

@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import OptionGroup from './OptionGroup';
 import Heading from './Heading';
 import IconGroup from './IconGroup';
@@ -28,4 +30,19 @@ const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
   </div>
 );
 
-export default ConfigView;
+ConfigView.propTypes = {
+  config: PropTypes.arrayOf(OptionGroup.propTypes.options).isRequired,
+  onRefresh: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired
+};
+
+const mapStateToProps = ({ config }) => ({
+  config
+});
+
+const mapDispatchToProps = () => ({
+
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ConfigView);

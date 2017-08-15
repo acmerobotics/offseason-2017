@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import TelemetryView from './TelemetryView';
 import Heading from './Heading';
 import SelectView from './SelectView';
 import GraphCanvas from './GraphCanvas';
@@ -61,7 +63,7 @@ class GraphView extends Component {
             :
             (
               <SelectView
-                arr={this.props.telemetry.entries.map(el => el.name)}
+                arr={this.props.telemetry.entries.map(entry => entry.name)}
                 exclude={['time']}
                 onChange={selected => this.setState({ keys: selected })}
                 selected={this.state.keys} />
@@ -72,4 +74,12 @@ class GraphView extends Component {
   }
 }
 
-export default GraphView;
+GraphView.propTypes = {
+  telemetry: TelemetryView.propTypes.telemetry
+};
+
+const mapStateToProps = ({ telemetry }) => ({
+  telemetry
+});
+
+export default connect(mapStateToProps)(GraphView);

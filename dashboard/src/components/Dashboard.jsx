@@ -102,7 +102,7 @@ class Dashboard extends Component {
   }
 
   connect() {
-    const host = '192.168.1.10';
+    const host = '192.168.1.5';
     const port = 8000;
     this.socket = new WebSocket(`ws://${host}:${port}`);
     this.socket.onmessage = (evt) => {

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Heading from './Heading';
 
 const truncate = (str, len) => {
@@ -24,6 +25,15 @@ const TelemetryView = ({ telemetry }) => {
       </table>
     </div>
   );
+};
+
+TelemetryView.propTypes = {
+  telemetry: PropTypes.shape({
+    entries: PropTypes.arrayOf(PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      value: PropTypes.any.isRequired
+    })).isRequired
+  }).isRequired
 };
 
 export default TelemetryView;

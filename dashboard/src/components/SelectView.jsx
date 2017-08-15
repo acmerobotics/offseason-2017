@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class SelectView extends React.Component {
   constructor(props) {
@@ -45,5 +46,12 @@ class SelectView extends React.Component {
     );
   }
 }
+
+SelectView.propTypes = {
+  arr: PropTypes.arrayOf(PropTypes.string).isRequired,
+  selected: PropTypes.arrayOf(PropTypes.string),
+  exclude: PropTypes.arrayOf(PropTypes.string),
+  onChange: PropTypes.func.isRequired
+};
 
 export default SelectView;

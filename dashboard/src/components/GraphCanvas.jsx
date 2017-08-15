@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import TelemetryView from './TelemetryView';
 import Graph from './Graph';
 
 class GraphCanvas extends React.Component {
@@ -54,5 +56,10 @@ class GraphCanvas extends React.Component {
     return <canvas ref={(c) => { this.canvas = c; }} width="1000" height="1000" />;
   }
 }
+
+GraphCanvas.propTypes = {
+  keys: PropTypes.arrayOf(PropTypes.string).isRequired,
+  telemetry: TelemetryView.propTypes.telemetry
+};
 
 export default GraphCanvas;

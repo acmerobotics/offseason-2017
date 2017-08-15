@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Field from './Field';
 import Heading from './Heading';
 
@@ -36,5 +37,9 @@ class FieldView extends React.Component {
     );
   }
 }
+
+FieldView.propTypes = {
+  overlay: PropTypes.array.isRequired
+};
 
 export default FieldView;
