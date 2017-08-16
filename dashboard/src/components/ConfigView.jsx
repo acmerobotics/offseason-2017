@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import OptionGroup from './OptionGroup';
+import ConfigOptionGroup from './ConfigOptionGroup';
 import Heading from './Heading';
 import IconGroup from './IconGroup';
 import Icon from './Icon';
+import { getConfig, syncConfig } from '../actions/config';
 
-const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
+const ConfigView = ({ config, onRefresh, onSave }) => (
   <div>
     <Heading level={2} text="Configuration">
       <IconGroup>
@@ -18,31 +19,31 @@ const ConfigView = ({ config, onRefresh, onSave, onChange }) => (
       </IconGroup>
     </Heading>
     {config.map((optionGroup, optionGroupIndex) => (
-      <OptionGroup
+      <ConfigOptionGroup
         key={optionGroupIndex}
         name={optionGroup.name}
-        options={optionGroup.options}
-        onChange={
-          (optionIndex, value) => onChange(optionGroupIndex, optionIndex, value)
-        }
-        onSave={onSave} />
+        options={optionGroup.options} />
     ))}
   </div>
 );
 
 ConfigView.propTypes = {
-  config: PropTypes.arrayOf(OptionGroup.propTypes.options).isRequired,
+  config: PropTypes.array.isRequired,
   onRefresh: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired
+  onSave: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({ config }) => ({
-  config: [] // TODO fix this
+  config
 });
 
-const mapDispatchToProps = () => ({
-
+const mapDispatchToProps = (dispatch) => ({
+  onRefresh: () => {
+    dispatch(getConfig());
+  },
+  onSave: () => {
+    dispatch(syncConfig());
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigView);

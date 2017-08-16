@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import TelemetryView from './TelemetryView';
 import Heading from './Heading';
-import SelectView from './SelectView';
+import MultipleCheckbox from './MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import IconGroup from './IconGroup';
 import Icon from './Icon';
@@ -62,7 +62,7 @@ class GraphView extends Component {
             <GraphCanvas keys={this.state.keys} telemetry={this.props.telemetry} />
             :
             (
-              <SelectView
+              <MultipleCheckbox
                 arr={this.props.telemetry.entries.map(entry => entry.name)}
                 exclude={['time']}
                 onChange={selected => this.setState({ keys: selected })}

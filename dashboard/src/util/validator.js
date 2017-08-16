@@ -1,3 +1,5 @@
+import { ConfigOptionType } from '../components/ConfigOption';
+
 function validateInt(oldValue, newValue) {
   if (/^-?$/.test(newValue)) {
     return {
@@ -36,27 +38,22 @@ function validateDouble(oldValue, newValue) {
 
 export default function validateOptionInput(option, newValue) {
   switch (option.type) {
-  case 'int':
+  case ConfigOptionType.INT:
     return validateInt(option.value, newValue);
-  case 'double':
+  case ConfigOptionType.DOUBLE:
     return validateDouble(option.value, newValue);
-  case 'pid': {
-    const key = Object.keys(newValue)[0];
-    const { valid, value } = validateDouble(option.value[key], newValue[key]);
-    if (!option.invalid) {
-      option.invalid = [];
-    }
-    if (valid && option.invalid.indexOf(key) !== -1) {
-      option.invalid = option.invalid.filter(el => el !== key);
-    } else if (!valid && option.invalid.indexOf(key) === -1) {
-      option.invalid.push(key);
-    }
+  case ConfigOptionType.PID: {
+    const p = validateDouble(option.value.p, newValue.p);
+    const i = validateDouble(option.value.i, newValue.i);
+    const d = validateDouble(option.value.d, newValue.d);
+
     return {
-      valid: option.invalid.length === 0,
+      valid: p.valid && i.valid && d.valid,
       value: {
-        ...option.value,
-        [key]: value,
-      },
+        p: p.value,
+        i: i.value,
+        d: d.value
+      }
     };
   }
   default:

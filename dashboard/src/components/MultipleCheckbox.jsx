@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class SelectView extends React.Component {
+class MultipleCheckbox extends React.Component {
   constructor(props) {
     super(props);
 
@@ -47,11 +47,11 @@ class SelectView extends React.Component {
   }
 }
 
-SelectView.propTypes = {
+MultipleCheckbox.propTypes = {
   arr: PropTypes.arrayOf(PropTypes.string).isRequired,
   selected: PropTypes.arrayOf(PropTypes.string),
   exclude: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func.isRequired
 };
 
-export default SelectView;
+export default MultipleCheckbox;
