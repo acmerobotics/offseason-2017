@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Tile = ({ children, hidden, row, column }) => (
+const Tile = ({ children, hidden, row, col }) => (
   <div
     className="tile"
     style={{
       overflow: hidden ? 'hidden' : 'auto',
       gridRow: row,
-      gridColumn: column,
+      gridcol: col,
     }}>
     { children }
   </div>
@@ -20,7 +20,7 @@ Tile.propTypes = {
     PropTypes.number,
     PropTypes.string
   ]).isRequired,
-  column: PropTypes.oneOfType([
+  col: PropTypes.oneOfType([
     PropTypes.number,
     PropTypes.string
   ]).isRequired

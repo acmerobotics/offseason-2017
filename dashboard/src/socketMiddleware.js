@@ -10,6 +10,7 @@ import {
 } from './actions/socket';
 import { receiveTelemetry } from './actions/telemetry';
 import { receiveConfig } from './actions/config';
+import { receiveFieldOverlay } from './actions/fieldOverlay';
 
 let socket, pingSentTime;
 
@@ -55,6 +56,10 @@ const socketMiddleware = store => next => action => {
 
         if (data.config) {
           store.dispatch(receiveConfig(data.config));
+        }
+
+        if (data.fieldOverlay) {
+          store.dispatch(receiveFieldOverlay(data.fieldOverlay));
         }
 
         break;

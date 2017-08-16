@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Field from './Field';
 import Heading from './Heading';
@@ -39,7 +40,13 @@ class FieldView extends React.Component {
 }
 
 FieldView.propTypes = {
-  overlay: PropTypes.array.isRequired
+  overlay: PropTypes.shape({
+    ops: PropTypes.array.isRequired
+  }).isRequired
 };
 
-export default FieldView;
+const mapStateToProps = ({ fieldOverlay }) => ({
+  overlay: fieldOverlay
+});
+
+export default connect(mapStateToProps)(FieldView);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Heading from './Heading';
 
@@ -36,4 +37,8 @@ TelemetryView.propTypes = {
   }).isRequired
 };
 
-export default TelemetryView;
+const mapStateToProps = ({ telemetry }) => ({
+  telemetry
+});
+
+export default connect(mapStateToProps)(TelemetryView);

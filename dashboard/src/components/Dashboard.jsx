@@ -7,7 +7,7 @@ import IconGroup from './IconGroup';
 import Icon from './Icon';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
-import GraphView from './GraphView';
+// import GraphView from './GraphView';
 import FieldView from './FieldView';
 import Tile from './Tile';
 import TileGrid from './TileGrid';
@@ -15,27 +15,6 @@ import validateOptionInput from '../util/validator';
 import { connect, disconnect } from '../actions/socket';
 
 class Dashboard extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isConnected: false,
-      pingTime: 0,
-      telemetry: {
-        entries: [],
-      },
-      config: [],
-      fieldOverlay: {
-        ops: [],
-      },
-    };
-
-    this.handleConfigChange = this.handleConfigChange.bind(this);
-    this.handleConfigSave = this.handleConfigSave.bind(this);
-    this.handleMessage = this.handleMessage.bind(this);
-    this.handleConfigRefresh = this.handleConfigRefresh.bind(this);
-  }
-
   componentDidMount() {
     this.props.dispatch(connect('192.168.1.7', 8000));
   }
@@ -114,21 +93,14 @@ class Dashboard extends Component {
         </Header>
         <TileGrid>
           <Tile row="1 / span 2" col={1} hidden>
-            <FieldView
-              overlay={this.state.fieldOverlay} />
-            {/* <GraphView
-              telemetry={this.state.telemetry} /> */}
+            <FieldView />
+            {/* <GraphView /> */}
           </Tile>
           <Tile row={1} col={2}>
-            <ConfigView
-              config={this.state.config}
-              onChange={this.handleConfigChange}
-              onSave={this.handleConfigSave}
-              onRefresh={this.handleConfigRefresh} />
+            <ConfigView />
           </Tile>
           <Tile row={2} col={2}>
-            <TelemetryView
-              telemetry={this.state.telemetry} />
+            <TelemetryView />
           </Tile>
         </TileGrid>
       </div>
@@ -138,7 +110,8 @@ class Dashboard extends Component {
 
 Dashboard.propTypes = {
   isConnected: PropTypes.bool.isRequired,
-  pingTime: PropTypes.number.isRequired
+  pingTime: PropTypes.number.isRequired,
+  dispatch: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({ socket }) => ({
