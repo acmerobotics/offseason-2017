@@ -38,7 +38,7 @@ ConfigView.propTypes = {
 };
 
 const mapStateToProps = ({ config }) => ({
-  config
+  config: [] // TODO fix this
 });
 
 const mapDispatchToProps = () => ({

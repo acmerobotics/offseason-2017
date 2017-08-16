@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect as reduxConnect } from 'react-redux';
+import PropTypes from 'prop-types';
 import Heading from './Heading';
 import Header from './Header';
 import IconGroup from './IconGroup';
@@ -10,6 +12,7 @@ import FieldView from './FieldView';
 import Tile from './Tile';
 import TileGrid from './TileGrid';
 import validateOptionInput from '../util/validator';
+import { connect, disconnect } from '../actions/socket';
 
 class Dashboard extends Component {
   constructor(props) {
@@ -34,18 +37,11 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
-    this.connect();
-    this.pingId = setInterval(() => {
-      if (this.state.isConnected) {
-        this.lastPingTime = Date.now();
-        this.socket.send('{"type":"ping"}');
-      }
-    }, 1000);
+    this.props.dispatch(connect('192.168.1.7', 8000));
   }
 
   componentWillUnmount() {
-    clearInterval(this.pingId);
-    this.socket.close();
+    this.props.dispatch(disconnect());
   }
 
   handleConfigChange(optionGroupIndex, optionIndex, newValue) {
@@ -101,32 +97,6 @@ class Dashboard extends Component {
     }
   }
 
-  connect() {
-    const host = '192.168.1.5';
-    const port = 8000;
-    this.socket = new WebSocket(`ws://${host}:${port}`);
-    this.socket.onmessage = (evt) => {
-      const msg = JSON.parse(evt.data);
-      this.handleMessage(msg);
-    };
-    this.socket.onopen = () => {
-      console.log('socket opened');
-      this.setState({
-        isConnected: true,
-      });
-    };
-    this.socket.onclose = () => {
-      console.log('socket closed');
-      this.setState({
-        isConnected: false,
-      });
-
-      setTimeout(() => {
-        this.connect();
-      }, 3000);
-    };
-  }
-
   render() {
     return (
       <div>
@@ -134,11 +104,11 @@ class Dashboard extends Component {
           <Heading text="FTC Dashboard" level={1}>
             <IconGroup>
               {
-                this.state.isConnected ?
-                  <p>{this.state.pingTime}ms&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                this.props.isConnected ?
+                  <p>{this.props.pingTime}ms&nbsp;&nbsp;&nbsp;&nbsp;</p>
                   : null
               }
-              <Icon icon={this.state.isConnected ? 'wifi' : 'no-wifi'} size="large" />
+              <Icon icon={this.props.isConnected ? 'wifi' : 'no-wifi'} size="large" />
             </IconGroup>
           </Heading>
         </Header>
@@ -166,4 +136,14 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard;
+Dashboard.propTypes = {
+  isConnected: PropTypes.bool.isRequired,
+  pingTime: PropTypes.number.isRequired
+};
+
+const mapStateToProps = ({ socket }) => ({
+  isConnected: socket.isConnected,
+  pingTime: socket.pingTime
+});
+
+export default reduxConnect(mapStateToProps)(Dashboard);
