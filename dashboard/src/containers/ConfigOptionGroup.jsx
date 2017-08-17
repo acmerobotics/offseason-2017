@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ConfigOption from './ConfigOption';
-import Heading from './Heading';
+import Heading from '../components/Heading';
 
 const ConfigOptionGroup = ({ name, options }) => (
   <div>

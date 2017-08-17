@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import CheckboxOption from './options/CheckboxOption';
-import PIDOption from './options/PIDOption';
-import SelectOption from './options/SelectOption';
-import TextOption from './options/TextOption';
+import CheckboxOption from '../components/options/CheckboxOption';
+import PIDOption from '../components/options/PIDOption';
+import SelectOption from '../components/options/SelectOption';
+import TextOption from '../components/options/TextOption';
 import { updateOptionValue } from '../actions/config';
 
 export const ConfigOptionType = {

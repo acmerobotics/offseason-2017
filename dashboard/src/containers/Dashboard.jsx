@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Heading from './Heading';
-import Header from './Header';
-import IconGroup from './IconGroup';
-import Icon from './Icon';
+import Heading from '../components/Heading';
+import Header from '../components/Header';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
 // import GraphView from './GraphView';
 import FieldView from './FieldView';
-import Tile from './Tile';
-import TileGrid from './TileGrid';
+import Tile from '../components/Tile';
+import TileGrid from '../components/TileGrid';
 import validateOptionInput from '../util/validator';
 import { connect, disconnect } from '../actions/socket';
 

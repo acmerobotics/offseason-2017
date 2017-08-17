@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import TelemetryView from './TelemetryView';
-import Heading from './Heading';
-import MultipleCheckbox from './MultipleCheckbox';
+import Heading from '../components/Heading';
+import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
-import IconGroup from './IconGroup';
-import Icon from './Icon';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
 
 class GraphView extends Component {
   constructor(props) {

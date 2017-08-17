@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import Dashboard from './components/Dashboard';
+import Dashboard from './containers/Dashboard';
 import configureStore from './configureStore';
 import registerServiceWorker from './util/registerServiceWorker';
 import './index.css';

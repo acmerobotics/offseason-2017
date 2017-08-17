@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import Heading from './Heading';
+import Heading from '../components/Heading';
 
 const truncate = (str, len) => {
   str = str.toString();

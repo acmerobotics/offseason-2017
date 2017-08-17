@@ -1,4 +1,4 @@
-import { ConfigOptionType } from '../components/ConfigOption';
+import { ConfigOptionType } from '../containers/ConfigOption';
 
 function validateInt(oldValue, newValue) {
   if (/^-?$/.test(newValue)) {

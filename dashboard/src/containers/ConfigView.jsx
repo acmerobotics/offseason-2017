@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ConfigOptionGroup from './ConfigOptionGroup';
-import Heading from './Heading';
-import IconGroup from './IconGroup';
-import Icon from './Icon';
+import Heading from '../components/Heading';
+import IconGroup from '../components/IconGroup';
+import Icon from '../components/Icon';
 import { getConfig, syncConfig } from '../actions/config';
 
 const ConfigView = ({ config, onRefresh, onSave }) => (
