@@ -9,6 +9,8 @@ import com.acmerobotics.library.dashboard.message.Message;
 import com.acmerobotics.library.dashboard.message.MessageDeserializer;
 import com.acmerobotics.library.dashboard.message.MessageType;
 import com.acmerobotics.library.dashboard.message.UpdateMessageData;
+import com.acmerobotics.library.dashboard.util.ClassFilter;
+import com.acmerobotics.library.dashboard.util.ClasspathScanner;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -16,9 +18,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
-
-import org.atteo.classindex.ClassIndex;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,15 +58,22 @@ public class RobotDashboard {
 		fieldOverlay = new Canvas();
 		optionGroups = new ArrayList<>();
 
-		// TODO: doesn't work
-        Iterable<Class<?>> configClasses = ClassIndex.getAnnotated(Config.class, AppUtil.getInstance().getActivity().getClassLoader());
-        for (Class<?> configClass : configClasses) {
-            if (configClass.isAnnotationPresent(Config.class)) {
-                Config annotation = (Config) configClass.getAnnotation(Config.class);
-                String name = annotation.value().equals("") ? configClass.getSimpleName() : annotation.value();
-                optionGroups.add(new OptionGroup(configClass, name, prefs));
-            }            
-        }
+        ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
+            @Override
+            public boolean shouldProcessClass(String className) {
+                return className.startsWith("com.acmerobotics");
+            }
+
+            @Override
+            public void processClass(Class clazz) {
+                if (clazz.isAnnotationPresent(Config.class)) {
+                    Config annotation = (Config) clazz.getAnnotation(Config.class);
+                    String name = annotation.value().equals("") ? clazz.getSimpleName() : annotation.value();
+                    optionGroups.add(new OptionGroup(clazz, name, prefs));
+                }
+            }
+        });
+        scanner.scanClasspath();
 
 		server = new RobotWebSocketServer(this);
 		try {
