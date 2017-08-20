@@ -9,6 +9,8 @@ import com.acmerobotics.library.dashboard.message.Message;
 import com.acmerobotics.library.dashboard.message.MessageDeserializer;
 import com.acmerobotics.library.dashboard.message.MessageType;
 import com.acmerobotics.library.dashboard.message.UpdateMessageData;
+import com.acmerobotics.library.dashboard.util.ClassFilter;
+import com.acmerobotics.library.dashboard.util.ClasspathScanner;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -16,8 +18,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
-import com.qualcomm.robotcore.util.ClassFilter;
-import com.qualcomm.robotcore.util.ClassManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,24 +56,24 @@ public class RobotDashboard {
 		sockets = new ArrayList<>();
 		telemetry = new Telemetry();
 		fieldOverlay = new Canvas();
-
 		optionGroups = new ArrayList<>();
-		try {
-            final ClassManager classManager = new ClassManager();
-            classManager.registerFilter(new ClassFilter() {
-                @Override
-                public void filter(Class clazz) {
-                    if (clazz.isAnnotationPresent(Config.class)) {
-                        Config annotation = (Config) clazz.getAnnotation(Config.class);
-                        String name = annotation.value().equals("") ? clazz.getSimpleName() : annotation.value();
-                        optionGroups.add(new OptionGroup(clazz, name, prefs));
-                    }
+
+        ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
+            @Override
+            public boolean shouldProcessClass(String className) {
+                return className.startsWith("com.acmerobotics");
+            }
+
+            @Override
+            public void processClass(Class clazz) {
+                if (clazz.isAnnotationPresent(Config.class)) {
+                    Config annotation = (Config) clazz.getAnnotation(Config.class);
+                    String name = annotation.value().equals("") ? clazz.getSimpleName() : annotation.value();
+                    optionGroups.add(new OptionGroup(clazz, name, prefs));
                 }
-            });
-            classManager.processAllClasses();
-        } catch (IOException e) {
-			Log.w(TAG, e);
-        }
+            }
+        });
+        scanner.scanClasspath();
 
 		server = new RobotWebSocketServer(this);
 		try {
@@ -82,6 +82,15 @@ public class RobotDashboard {
 			e.printStackTrace();
 		}
 	}
+
+	public void registerConfigClass(Class<?> configClass, String name) {
+	    optionGroups.add(new OptionGroup(configClass, name, prefs));
+	    sendAll(getConfigUpdateMessage());
+    }
+
+    public void registerConfigClass(Class<?> configClass) {
+	    registerConfigClass(configClass, configClass.getSimpleName());
+    }
 
     public void addTelemetry(String key, String value) {
         addTelemetry(key, new JsonPrimitive(value));

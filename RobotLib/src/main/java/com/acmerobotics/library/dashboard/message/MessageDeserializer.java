@@ -29,6 +29,7 @@ public class MessageDeserializer implements JsonDeserializer<Message> {
                 return new Message(messageType, jsonDeserializationContext.deserialize(data, String.class));
             default:
                 Log.w(RobotDashboard.TAG, String.format("Unknown message type: %s (%s)", messageType, messageTypeString));
+            case PING:
                 return new Message(messageType);
         }
     }

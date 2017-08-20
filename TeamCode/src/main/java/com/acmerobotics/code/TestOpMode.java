@@ -4,9 +4,6 @@ import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.robot.Robot;
-
-import org.firstinspires.ftc.robotcore.external.Const;
 
 /**
  * @author Ryan
@@ -24,6 +21,7 @@ public class TestOpMode extends OpMode {
     @Override
     public void init() {
         dashboard = RobotDashboard.getInstance();
+        dashboard.registerConfigClass(Constants.class);
         motor = hardwareMap.dcMotor.get("motor");
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         maxRpm = motor.getMotorType().getMaxRPM();
