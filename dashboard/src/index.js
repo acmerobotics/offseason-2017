@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import Dashboard from './containers/Dashboard';
 import configureStore from './configureStore';
-import registerServiceWorker from './util/registerServiceWorker';
 import './index.css';
 
 const store = configureStore();
@@ -13,4 +12,3 @@ ReactDOM.render(
     <Dashboard />
   </Provider>,
   document.getElementById('root'));
-registerServiceWorker();
