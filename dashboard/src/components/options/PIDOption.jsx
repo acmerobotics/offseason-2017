@@ -1,33 +1,39 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import DoubleOption from './DoubleOption';
 
 const PIDOption = ({ value, onChange }) => (
-  <span>
-    p: <input
-      type="text"
-      size="8"
-      value={value.p}
-      onChange={evt => onChange({
-        ...value,
-        p: evt.target.value
-      })} />&nbsp;&nbsp;
-    i: <input
-      type="text"
-      size="8"
-      value={value.i}
-      onChange={evt => onChange({
-        ...value,
-        i: evt.target.value
-      })} />&nbsp;&nbsp;
-    d: <input
-      type="text"
-      size="8"
-      value={value.d}
-      onChange={evt => onChange({
-        ...value,
-        d: evt.target.value
-      })} />&nbsp;&nbsp;
-  </span>
+  <table className="valid">
+    <tbody>
+      <tr>
+        <td>P: </td>
+        <td>
+          <DoubleOption value={value.p} onChange={p => onChange({
+            ...value,
+            p
+          })} />
+        </td>
+      </tr>
+      <tr>
+        <td>I: </td>
+        <td>
+          <DoubleOption value={value.i} onChange={i => onChange({
+            ...value,
+            i
+          })} />
+        </td>
+      </tr>
+      <tr>
+        <td>D: </td>
+        <td>
+          <DoubleOption value={value.d} onChange={d => onChange({
+            ...value,
+            d
+          })} />
+        </td>
+      </tr>
+    </tbody>
+  </table>
 );
 
 PIDOption.propTypes = {

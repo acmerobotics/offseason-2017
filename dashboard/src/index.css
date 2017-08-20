@@ -9,6 +9,7 @@ header h1 { margin: 0; }
 table { margin: 0; border-collapse: collapse; text-align: left; }
 td { padding: 4px; }
 input { font-size: inherit; outline: none; }
+.invalid { border: 2px solid red; }
 .icon-group { display: flex; align-items: center; order: 10; }
 .icon { background-repeat: round; margin: 4px; }
 .icon.small { width: 24px; height: 24px; }

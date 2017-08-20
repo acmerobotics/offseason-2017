@@ -1,10 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import CheckboxOption from '../components/options/CheckboxOption';
+import BooleanOption from '../components/options/BooleanOption';
 import PIDOption from '../components/options/PIDOption';
-import SelectOption from '../components/options/SelectOption';
-import TextOption from '../components/options/TextOption';
+import EnumOption from '../components/options/EnumOption';
+import StringOption from '../components/options/StringOption';
+import IntOption from '../components/options/IntOption';
+import DoubleOption from '../components/options/DoubleOption';
 import { updateOptionValue } from '../actions/config';
 
 export const ConfigOptionType = {
@@ -22,13 +24,15 @@ class ConfigOption extends React.Component {
 
     switch (option.type) {
     case ConfigOptionType.INT:
+      return <IntOption value={option.value} onChange={this.props.onChange} />;
     case ConfigOptionType.DOUBLE:
+      return <DoubleOption value={option.value} onChange={this.props.onChange} />;
     case ConfigOptionType.STRING:
-      return <TextOption value={option.value} onChange={this.props.onChange} />;
+      return <StringOption value={option.value} onChange={this.props.onChange} />;
     case ConfigOptionType.BOOLEAN:
-      return <CheckboxOption value={option.value} onChange={this.props.onChange} />;
+      return <BooleanOption value={option.value} onChange={this.props.onChange} />;
     case ConfigOptionType.ENUM:
-      return <SelectOption value={option.value} values={option.values} onChange={this.props.onChange} />;
+      return <EnumOption value={option.value} values={option.values} onChange={this.props.onChange} />;
     case ConfigOptionType.PID:
       return <PIDOption value={option.value} onChange={this.props.onChange} />;
     default:

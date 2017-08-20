@@ -1,5 +1,4 @@
 import { RECEIVE_CONFIG, UPDATE_OPTION_VALUE } from '../actions/config';
-import validateOptionValue from '../util/validator';
 
 const initialState = [];
 
@@ -10,8 +9,6 @@ const config = (state = initialState, action) => {
   case UPDATE_OPTION_VALUE: {
     const { option, newValue } = action;
 
-    const validatedValue = validateOptionValue(option, newValue).value;
-
     return state.map(optionGroup => {
       if (optionGroup.name === action.optionGroup) {
         return {
@@ -20,7 +17,7 @@ const config = (state = initialState, action) => {
             if (o.name === option.name) {
               return {
                 ...o,
-                value: validatedValue
+                value: newValue
               };
             } else {
               return o;

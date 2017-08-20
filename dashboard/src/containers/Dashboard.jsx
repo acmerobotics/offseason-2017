@@ -11,7 +11,6 @@ import ConfigView from './ConfigView';
 import FieldView from './FieldView';
 import Tile from '../components/Tile';
 import TileGrid from '../components/TileGrid';
-import validateOptionInput from '../util/validator';
 import { connect, disconnect } from '../actions/socket';
 
 class Dashboard extends Component {
@@ -21,59 +20,6 @@ class Dashboard extends Component {
 
   componentWillUnmount() {
     this.props.dispatch(disconnect());
-  }
-
-  handleConfigChange(optionGroupIndex, optionIndex, newValue) {
-    const configCopy = this.state.config.slice();
-    const optionGroup = configCopy[optionGroupIndex];
-    const option = optionGroup.options[optionIndex];
-    const { valid, value } = validateOptionInput(option, newValue);
-    console.log(`[onChange]
-      ${option.name} (${option.type}):\t
-      ${JSON.stringify(option.value)} => ${JSON.stringify(value)}`);
-    option.value = value;
-    const name = option.name;
-    if (!optionGroup.invalid) {
-      optionGroup.invalid = [];
-    }
-    if (valid && optionGroup.invalid.indexOf(name) !== -1) {
-      optionGroup.invalid = optionGroup.invalid.filter(el => el !== name);
-    } else if (!valid && optionGroup.invalid.indexOf(name) === -1) {
-      optionGroup.invalid.push(name);
-    }
-    this.setState({
-      config: configCopy,
-    });
-  }
-
-  handleConfigRefresh() {
-    this.socket.send(JSON.stringify({
-      type: 'get',
-      data: 'config',
-    }));
-  }
-
-  handleConfigSave() {
-    if (this.state.config.every(v => !v.invalid || v.invalid.length === 0)) {
-      this.socket.send(JSON.stringify({
-        type: 'update',
-        data: {
-          config: this.state.config,
-        },
-      }));
-    }
-  }
-
-  handleMessage(msg) {
-    if (msg.type === 'pong') {
-      const pingTime = Date.now() - this.lastPingTime;
-      this.setState({ pingTime });
-    } else if (msg.type === 'update') {
-      this.setState(msg.data);
-    } else {
-      console.log('recv\'d unknown message: ');
-      console.log(msg);
-    }
   }
 
   render() {
