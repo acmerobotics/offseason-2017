@@ -17,17 +17,23 @@ import org.firstinspires.ftc.teamcode.R;
 @TeleOp(name = "Camera Test")
 public class CameraTest extends OpMode {
 
+    private Camera2Fragment fragment;
+    private Activity activity;
+
     @Override
     public void init() {
-        ((Activity) hardwareMap.appContext).getFragmentManager().beginTransaction()
-                .replace(R.id.cameraMonitorViewId, Camera2Fragment.newInstance(new ImageReader.OnImageAvailableListener() {
-                    @Override
-                    public void onImageAvailable(ImageReader imageReader) {
-                        Log.i("CameraTest", "onImageAvailable");
-                        // pretend to consume the image
-                        imageReader.acquireLatestImage().close();
-                    }
-                }, R.layout.fragment_camera2))
+        this.activity = (Activity) hardwareMap.appContext;
+        this.fragment = Camera2Fragment.newInstance(new ImageReader.OnImageAvailableListener() {
+            @Override
+            public void onImageAvailable(ImageReader imageReader) {
+                Log.i("CameraTest", "onImageAvailable");
+                // pretend to consume the image
+                imageReader.acquireLatestImage().close();
+            }
+        }, R.layout.fragment_camera2);
+
+        this.activity.getFragmentManager().beginTransaction()
+                .replace(R.id.cameraMonitorViewId, fragment)
                 .commit();
     }
 
@@ -38,6 +44,8 @@ public class CameraTest extends OpMode {
 
     @Override
     public void stop() {
-
+        this.activity.getFragmentManager().beginTransaction()
+                .remove(fragment)
+                .commit();
     }
 }
