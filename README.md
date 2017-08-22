@@ -1,5 +1,5 @@
 # Offseason 2017
-Instructions for running the dashboard can be found in `web-app/README.md`.
+Instructions for running the dashboard can be found in `dashboard/README.md`.
 
 FTC Android Studio project to create FTC Robot Controller app.
 =======
