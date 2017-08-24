@@ -54,6 +54,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.google.blocks.ftcrobotcontroller.BlocksActivity;
 import com.google.blocks.ftcrobotcontroller.ProgrammingModeActivity;
 import com.google.blocks.ftcrobotcontroller.ProgrammingModeControllerImpl;
@@ -137,6 +138,8 @@ public class FtcRobotControllerActivity extends Activity {
 
   protected FtcEventLoop eventLoop;
   protected Queue<UsbDevice> receivedUsbAttachmentNotifications;
+
+  protected RobotDashboard dashboard;
 
   protected class RobotRestarter implements Restarter {
 
@@ -319,6 +322,8 @@ public class FtcRobotControllerActivity extends Activity {
         return false;
       }
     });
+
+    dashboard = RobotDashboard.open(this, eventLoop);
   }
 
   @Override
@@ -342,6 +347,9 @@ public class FtcRobotControllerActivity extends Activity {
     // called surprisingly often. So, we don't actually do much here.
     super.onStop();
     RobotLog.vv(TAG, "onStop()");
+
+    dashboard.stop();
+    dashboard = null;
   }
 
   @Override

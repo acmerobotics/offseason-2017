@@ -22,13 +22,13 @@ apply plugin: 'com.android.application'
 android {
 
     compileSdkVersion 23
-    buildToolsVersion '23.0.3'
+    buildToolsVersion '25.0.0'
 
     signingConfigs {
         debug {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
-            storeFile rootProject.file('libs/ftc.debug.keystore')
+            storeFile rootProject.file('ftc_app/libs/ftc.debug.keystore')
             storePassword 'android'
         }
     }
@@ -93,11 +93,15 @@ android {
         jni.srcDirs = []
         jniLibs.srcDir rootProject.file('libs')
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 repositories {
     flatDir {
-        dirs rootProject.file('libs')
+        dirs rootProject.file('ftc_app/libs')
     }
 }
 
