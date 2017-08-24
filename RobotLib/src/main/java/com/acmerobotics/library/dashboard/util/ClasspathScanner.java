@@ -3,7 +3,7 @@ package com.acmerobotics.library.dashboard.util;
 import android.content.Context;
 import android.util.Log;
 
-import org.firstinspires.ftc.robotcore.internal.AppUtil;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
