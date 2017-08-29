@@ -2,6 +2,7 @@ from subprocess import run, Popen, PIPE, DEVNULL
 from time import sleep
 import sys, os
 
+
 PROFILE_XML = '''<?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
     <name>{ssid}</name>
@@ -57,33 +58,45 @@ def list_wifi_networks():
 
 def connect_to_wifi_network(network, passphrase):
     if os.name == 'nt':
-        # create and add profile
+        # create and add profile for the network
+        print('Creating profile')
         with open('temp.xml', mode='w') as fh:
             fh.write(PROFILE_XML.format(ssid=network, passphrase=passphrase))
+        print('Loading profile')
         run(['netsh', 'wlan', 'add', 'profile', 'filename="temp.xml"'], stdout=DEVNULL)
         os.remove('temp.xml')
-        # try to connect and wait until we're connected
+        # update the network as necessary
+        i = 0
         while True:
-            run(['netsh', 'wlan', 'connect', network], stdout=DEVNULL)
-            sleep(2)
-            output = run(['netsh', 'wlan', 'show', 'interfaces'], stdout=PIPE).stdout.decode('ascii').split('\r\n')
-            for line in output:
-                if ('SSID' in line) and (line.split()[-1] == network):
+            output_lines = run(['netsh', 'wlan', 'show', 'interfaces'], stdout=PIPE).stdout.decode('ascii').split('\r\n')
+            fields = {(line.split(':')[0].strip()): (line.split(':')[-1].strip()) for line in output_lines if ' :' in line}
+            if fields['State'] == 'connected' and fields['SSID'] == network:
+                i += 1
+                if i >= 10:
+                    print('Connected to {}'.format(fields['SSID']))
                     return
+            elif (fields['State'] == 'disconnected') or (fields['State'] == 'connected' and fields['SSID'] != network):
+                i = 0
+                run(['netsh', 'wlan', 'connect', network], stdout=DEVNULL)
+                print('Attempting to connect')
+            else:
+                i = 0
+            sleep(0.25)
     else:
         print('Failure: wifi network listing not support on %s' % os.name)
 
 
 if __name__ == '__main__':
     print('Connecting to device')
-    devices = list_devices()
-    if len(devices) == 0:
-        print('Failure: please connect a device')
-        sys.exit(-1)
-    if len(devices) > 1:
-        print('Failure: disconnect every device except for one')
-        sys.exit(-1)
-    print('Selected device %s' % devices[0])
+    while True:
+        devices = list_devices()
+        print('Devices:')
+        for i, device in enumerate(devices):
+            print('{}: {}'.format(i, device))
+        device_input = input('Select device: ')
+        if device_input != '':
+            os.environ['ANDROID_SERIAL'] = devices[int(device_input)]
+            break
     print('Restarting robot controller')
     if run(['adb', 'shell', 'am', 'force-stop', 'com.qualcomm.ftcrobotcontroller'], stdout=DEVNULL).returncode != 0:
         print('Failure: unable to restart robot controller')
@@ -93,7 +106,6 @@ if __name__ == '__main__':
            stdout=DEVNULL).returncode != 0:
         print('Failure: unable to start robot controller')
         sys.exit(-1)
-    # TODO fix a problem where logcat doesn't pick up the passphrase because the app wasn't installed by this computer
     print('Scanning logcat for passphrase')
     passphrase = None
     with Popen(['adb', 'logcat'], stdout=PIPE, universal_newlines=True) as proc:
@@ -103,12 +115,15 @@ if __name__ == '__main__':
                 break
         proc.kill()
     print('Got WiFi passphrase: %s' % passphrase)
-    print('Available networks:')
-    networks = list_wifi_networks()
-    for i, network in enumerate(networks):
-        print('%d: %s' % (i, network))
-    network = networks[int(input('Select network: '))]
-    connect_to_wifi_network(network, passphrase)
+    while True:
+        networks = list_wifi_networks()
+        print('Available networks:')
+        for i, network in enumerate(networks):
+            print('%d: %s' % (i, network))
+        network_input = input('Select network: ')
+        if network_input != '':
+            connect_to_wifi_network(networks[int(network_input)], passphrase)
+            break
     print('Connecting over wireless ADB')
     run(['adb', 'tcpip', '5555'], stdout=DEVNULL)
     run(['adb', 'connect', '192.168.49.1:5555'], stdout=DEVNULL)
