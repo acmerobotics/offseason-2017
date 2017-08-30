@@ -108,12 +108,12 @@ if __name__ == '__main__':
         sys.exit(-1)
     print('Scanning logcat for passphrase')
     passphrase = None
-    with Popen(['adb', 'logcat'], stdout=PIPE, universal_newlines=True) as proc:
-        for line in iter(proc.stdout.readline, ''):
-            if 'passphrase' in line.lower():
-                passphrase = line.split()[-1]
-                break
-        proc.kill()
+    proc = Popen(['adb', 'logcat'], stdout=PIPE, universal_newlines=True, encoding='utf-8')
+    for line in iter(proc.stdout.readline, ''):
+        if 'passphrase' in line.lower():
+            passphrase = line.split()[-1]
+            break
+    proc.kill()
     print('Got WiFi passphrase: %s' % passphrase)
     while True:
         networks = list_wifi_networks()
