@@ -155,7 +155,7 @@ public class FtcRobotControllerActivity extends Activity
   protected FtcEventLoop eventLoop;
   protected Queue<UsbDevice> receivedUsbAttachmentNotifications;
 
-  private RobotDashboard dashboard;
+  protected RobotDashboard dashboard;
 
   protected class RobotRestarter implements Restarter {
 
@@ -343,6 +343,8 @@ public class FtcRobotControllerActivity extends Activity
         return false;
       }
     });
+
+    dashboard = RobotDashboard.open(this, eventLoop);
   }
 
   @Override
@@ -366,6 +368,9 @@ public class FtcRobotControllerActivity extends Activity
     // called surprisingly often. So, we don't actually do much here.
     super.onStop();
     RobotLog.vv(TAG, "onStop()");
+
+    dashboard.stop();
+    dashboard = null;
   }
 
   @Override
@@ -584,9 +589,6 @@ public class FtcRobotControllerActivity extends Activity
     controllerService.setupRobot(eventLoop, idleLoop);
 
     passReceivedUsbAttachmentsToEventLoop();
-
-    // TODO dashboard entry point
-    dashboard = RobotDashboard.open(this, eventLoop);
   }
 
   protected OpModeRegister createOpModeRegister() {
@@ -595,9 +597,6 @@ public class FtcRobotControllerActivity extends Activity
 
   private void shutdownRobot() {
     if (controllerService != null) controllerService.shutdownRobot();
-
-    // TODO dashboard exit point
-    if (dashboard != null) dashboard.stop();
   }
 
   private void requestRobotRestart() {
