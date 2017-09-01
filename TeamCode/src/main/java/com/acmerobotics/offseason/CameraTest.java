@@ -1,4 +1,4 @@
-package com.acmerobotics.code;
+package com.acmerobotics.offseason;
 
 import android.app.Activity;
 import android.media.ImageReader;
@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.R;
  * Created by ryanbrott on 8/21/17.
  */
 
-@TeleOp(name = "Camera Test")
+@TeleOp(name = "Camera2 Test", group = "Test")
 public class CameraTest extends OpMode {
 
     private Camera2Fragment fragment;

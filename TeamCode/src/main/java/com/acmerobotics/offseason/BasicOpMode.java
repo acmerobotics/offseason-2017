@@ -1,4 +1,4 @@
-package com.acmerobotics.code;
+package com.acmerobotics.offseason;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * @author Ryan
  */
 
-@TeleOp(name="Basic")
+@TeleOp(name="Sensor Dashboard Test", group = "Test")
 public class BasicOpMode extends OpMode implements SensorEventListener {
     private RobotDashboard dashboard;
     private Sensor sensor;

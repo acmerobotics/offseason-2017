@@ -1,7 +1,6 @@
-package com.acmerobotics.code;
+package com.acmerobotics.offseason;
 
 import com.acmerobotics.library.configuration.OpModeConfiguration;
-import com.acmerobotics.library.dashboard.Config;
 import com.acmerobotics.library.dashboard.Persist;
 
 /**

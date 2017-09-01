@@ -1,10 +1,7 @@
-package com.acmerobotics.code;
+package com.acmerobotics.velocityvortex.drive;
 
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 import com.qualcomm.robotcore.util.Range;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class implements a regular PID controller.
@@ -43,7 +40,7 @@ public class PIDController {
     }
 
     public double update(double error) {
-        return update(error, System.nanoTime() / Math.pow(10, 9));
+        return update(error, System.nanoTime() / Math.pow(10, 0));
     }
 
     /**
