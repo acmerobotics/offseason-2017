@@ -12,6 +12,7 @@ import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -52,6 +53,9 @@ public class MainTeleOp extends OpMode {
     @Override
     public void init() {
         dashboard = RobotDashboard.getInstance();
+
+        hardwareMap.dcMotor.get("leftFront").setDirection(DcMotorSimple.Direction.REVERSE);
+        hardwareMap.dcMotor.get("leftBack").setDirection(DcMotorSimple.Direction.REVERSE);
 
         basicDrive = new MecanumDrive(hardwareMap);
 
@@ -189,6 +193,7 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("leftSpeed", launcher.getLeftSpeed());
         telemetry.addData("rightSpeed", launcher.getRightSpeed());
 
+        dashboard.addTelemetry("time", System.currentTimeMillis());
         dashboard.addTelemetry("leftSpeed", launcher.getLeftSpeed());
         dashboard.addTelemetry("rightSpeed", launcher.getRightSpeed());
         dashboard.addTelemetry("launcherVoltage", launcher.getVoltage());

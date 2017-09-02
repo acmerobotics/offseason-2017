@@ -7,7 +7,7 @@ import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
 import TelemetryView from './TelemetryView';
 import ConfigView from './ConfigView';
-// import GraphView from './GraphView';
+import GraphView from './GraphView';
 import FieldView from './FieldView';
 import Tile from '../components/Tile';
 import TileGrid from '../components/TileGrid';
@@ -15,7 +15,7 @@ import { connect, disconnect } from '../actions/socket';
 
 class Dashboard extends Component {
   componentDidMount() {
-    this.props.dispatch(connect('192.168.1.7', 8000));
+    this.props.dispatch(connect('192.168.49.1', 8000));
   }
 
   componentWillUnmount() {
@@ -39,8 +39,8 @@ class Dashboard extends Component {
         </Header>
         <TileGrid>
           <Tile row="1 / span 2" col={1} hidden>
-            <FieldView />
-            {/* <GraphView /> */}
+            {/* }<FieldView /> */}
+            <GraphView />
           </Tile>
           <Tile row={1} col={2}>
             <ConfigView />
