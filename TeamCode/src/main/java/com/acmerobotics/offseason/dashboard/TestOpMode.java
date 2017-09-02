@@ -1,4 +1,4 @@
-package com.acmerobotics.offseason;
+package com.acmerobotics.offseason.dashboard;
 
 import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * @author Ryan
  */
 
-@TeleOp(name = "PID Test", group = "Test")
-public class PIDTest extends OpMode {
+@TeleOp(name="PID Test", group = "Test")
+public class TestOpMode extends OpMode {
     private RobotDashboard dashboard;
     private DcMotor motor;
     private PIDController controller;
@@ -65,6 +65,7 @@ public class PIDTest extends OpMode {
             dashboard.addTelemetry("speed", speed);
             dashboard.addTelemetry("maxSpeed", maxSpeed);
             dashboard.addTelemetry("distanceLeft", distanceLeft);
+            dashboard.addTelemetry("time", time);
         }
         lastTime = time;
         lastSpeed = speed;

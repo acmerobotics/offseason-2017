@@ -1,4 +1,4 @@
-package com.acmerobotics.offseason;
+package com.acmerobotics.offseason.dashboard;
 
 import android.app.Activity;
 import android.media.ImageReader;

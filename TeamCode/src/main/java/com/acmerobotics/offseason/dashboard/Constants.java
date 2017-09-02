@@ -1,4 +1,4 @@
-package com.acmerobotics.offseason;
+package com.acmerobotics.offseason.dashboard;
 
 import com.acmerobotics.library.dashboard.Config;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
