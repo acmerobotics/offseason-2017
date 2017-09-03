@@ -23,9 +23,14 @@ class GraphCanvas extends React.Component {
 
   componentDidUpdate() {
     if (this.props.keys.length > 0) {
-      this.graph.addData(
-        this.props.telemetry.entries
-          .filter(entry => (this.props.keys.indexOf(entry.name) !== -1 || entry.name === 'time')));
+      this.graph.addData([
+        ...this.props.telemetry.entries
+          .filter(entry => (this.props.keys.indexOf(entry.name) !== -1)),
+        {
+          name: 'time',
+          value: this.props.telemetry.timestamp
+        }
+      ]);
     }
   }
 

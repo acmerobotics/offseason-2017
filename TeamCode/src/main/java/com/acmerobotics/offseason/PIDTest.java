@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * @author Ryan
  */
 
-@TeleOp(name="PID Test", group = "Test")
-public class TestOpMode extends OpMode {
+@TeleOp(name = "PID Test", group = "Test")
+public class PIDTest extends OpMode {
     private RobotDashboard dashboard;
     private DcMotor motor;
     private PIDController controller;
@@ -65,7 +65,6 @@ public class TestOpMode extends OpMode {
             dashboard.addTelemetry("speed", speed);
             dashboard.addTelemetry("maxSpeed", maxSpeed);
             dashboard.addTelemetry("distanceLeft", distanceLeft);
-            dashboard.addTelemetry("time", time);
         }
         lastTime = time;
         lastSpeed = speed;

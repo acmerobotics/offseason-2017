@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.R;
  */
 
 @TeleOp(name = "Camera2 Test", group = "Test")
-public class CameraTest extends OpMode {
+public class Camera2Test extends OpMode {
 
     private Camera2Fragment fragment;
     private Activity activity;
@@ -26,7 +26,7 @@ public class CameraTest extends OpMode {
         this.fragment = Camera2Fragment.newInstance(new ImageReader.OnImageAvailableListener() {
             @Override
             public void onImageAvailable(ImageReader imageReader) {
-                Log.i("CameraTest", "onImageAvailable");
+                Log.i("Camera2Test", "onImageAvailable");
                 // pretend to consume the image
                 imageReader.acquireLatestImage().close();
             }

@@ -1,6 +1,7 @@
 import { RECEIVE_TELEMETRY } from '../actions/telemetry';
 
 const initialState = {
+  timestamp: 0,
   entries: []
 };
 

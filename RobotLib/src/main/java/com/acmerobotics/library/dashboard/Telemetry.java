@@ -20,6 +20,7 @@ public class Telemetry {
         }
     }
 
+    private long timestamp;
     private List<Entry> entries;
 
     public Telemetry() {
@@ -28,6 +29,10 @@ public class Telemetry {
 
     public void addEntry(Entry entry) {
         entries.add(entry);
+    }
+
+    public void updateTimestamp() {
+        this.timestamp = System.currentTimeMillis();
     }
 
     public void clear() {

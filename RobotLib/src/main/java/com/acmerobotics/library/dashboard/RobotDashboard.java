@@ -113,6 +113,7 @@ public class RobotDashboard {
     }
 
     public void updateTelemetry() {
+	    telemetry.updateTimestamp();
         sendAll(getTelemetryUpdateMessage());
         telemetry.clear();
     }
