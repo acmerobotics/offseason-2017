@@ -14,48 +14,59 @@ public class Canvas {
         ops = new ArrayList<>();
     }
 
-    public void strokeCircle(double x, double y, double radius) {
+    public Canvas strokeCircle(double x, double y, double radius) {
         ops.add(new Circle(x, y, radius, true));
+        return this;
     }
 
-    public void fillCircle(double x, double y, double radius) {
+    public Canvas fillCircle(double x, double y, double radius) {
         ops.add(new Circle(x, y, radius, false));
+        return this;
     }
 
-    public void strokePolygon(double[] xPoints, double[] yPoints) {
+    public Canvas strokePolygon(double[] xPoints, double[] yPoints) {
         ops.add(new Polygon(xPoints, yPoints, true));
+        return this;
     }
 
-    public void fillPolygon(double[] xPoints, double[] yPoints) {
+    public Canvas fillPolygon(double[] xPoints, double[] yPoints) {
         ops.add(new Polygon(xPoints, yPoints, false));
+        return this;
     }
 
-    public void strokePolyline(double[] xPoints, double[] yPoints) {
+    public Canvas strokePolyline(double[] xPoints, double[] yPoints) {
         ops.add(new Polyline(xPoints, yPoints));
+        return this;
     }
 
-    public void strokeLine(double x1, double y1, double x2, double y2) {
+    public Canvas strokeLine(double x1, double y1, double x2, double y2) {
         strokePolyline(new double[] { x1, x2 }, new double[] { y1, y2 });
+        return this;
     }
 
-    public void fillRect(double x, double y, double width, double height) {
+    public Canvas fillRect(double x, double y, double width, double height) {
         fillPolygon(new double[] { x, x + width, x + width, x }, new double[] { y, y, y + height, y + height });
+        return this;
     }
 
-    public void strokeRect(double x, double y, double width, double height) {
+    public Canvas strokeRect(double x, double y, double width, double height) {
         strokePolygon(new double[] { x, x + width, x + width, x }, new double[] { y, y, y + height, y + height });
+        return this;
     }
 
-    public void setFill(String color) {
+    public Canvas setFill(String color) {
         ops.add(new Fill(color));
+        return this;
     }
 
-    public void setStroke(String color) {
+    public Canvas setStroke(String color) {
         ops.add(new Stroke(color));
+        return this;
     }
 
-    public void setStrokeWidth(int width) {
+    public Canvas setStrokeWidth(int width) {
         ops.add(new StrokeWidth(width));
+        return this;
     }
 
     public List<CanvasOp> getOperations() {
