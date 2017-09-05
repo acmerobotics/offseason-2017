@@ -19,6 +19,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class RobotDashboard {
 		return dashboard;
 	};
 
-	private Telemetry telemetry;
+	private DashboardTelemetry telemetry;
 	private SharedPreferences prefs;
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
@@ -54,7 +56,7 @@ public class RobotDashboard {
 	private RobotDashboard(Context ctx) {
 		prefs = ctx.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
-		telemetry = new Telemetry();
+		telemetry = new DashboardTelemetry(this);
 		fieldOverlay = new Canvas();
 		optionGroups = new ArrayList<>();
 
@@ -92,30 +94,8 @@ public class RobotDashboard {
 	    registerConfigClass(configClass, configClass.getSimpleName());
     }
 
-    public void addTelemetry(String key, String value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, boolean value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, int value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, double value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, JsonElement element) {
-        telemetry.addEntry(new Telemetry.Entry(key, element));
-    }
-
-    public void updateTelemetry() {
-	    telemetry.updateTimestamp();
-        sendAll(getTelemetryUpdateMessage());
-        telemetry.clear();
+    public Telemetry getTelemetry() {
+	    return telemetry;
     }
 
     public Canvas getFieldOverlay() {
@@ -153,7 +133,7 @@ public class RobotDashboard {
 	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().config(getConfigJson()).build());
     }
 
-	private Message getTelemetryUpdateMessage() {
+	public Message getTelemetryUpdateMessage() {
 		return new Message(MessageType.UPDATE, UpdateMessageData.builder().telemetry(telemetry).build());
 	}
 

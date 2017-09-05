@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import TelemetryView from './TelemetryView';
 import Heading from '../components/Heading';
 import MultipleCheckbox from '../components/MultipleCheckbox';
 import GraphCanvas from './GraphCanvas';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
+import { getAllItems } from '../reducers/telemetry';
 
 class GraphView extends Component {
   constructor(props) {
@@ -59,12 +60,15 @@ class GraphView extends Component {
         </Heading>
         {
           this.state.graphing ?
-            <GraphCanvas keys={this.state.keys} telemetry={this.props.telemetry} />
+            <GraphCanvas
+              timestamp={this.props.timestamp}
+              items={this.props.items.filter(({ caption }) => (
+                this.state.keys.indexOf(caption) !== -1
+              ))} />
             :
             (
               <MultipleCheckbox
-                arr={this.props.telemetry.entries.map(entry => entry.name)}
-                exclude={['time']}
+                arr={this.props.items.map(item => item.caption)}
                 onChange={selected => this.setState({ keys: selected })}
                 selected={this.state.keys} />
             )
@@ -74,12 +78,19 @@ class GraphView extends Component {
   }
 }
 
+const itemPropType = PropTypes.shape({
+  caption: PropTypes.string,
+  value: PropTypes.string
+});
+
 GraphView.propTypes = {
-  telemetry: TelemetryView.propTypes.telemetry
+  timestamp: PropTypes.number.isRequired,
+  items: PropTypes.arrayOf(itemPropType)
 };
 
 const mapStateToProps = ({ telemetry }) => ({
-  telemetry
+  timestamp: telemetry.timestamp,
+  items: getAllItems(telemetry)
 });
 
 export default connect(mapStateToProps)(GraphView);

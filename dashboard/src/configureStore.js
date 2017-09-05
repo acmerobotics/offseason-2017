@@ -4,9 +4,10 @@ import thunk from 'redux-thunk';
 import socketMiddleware from './socketMiddleware';
 import reducer from './reducers';
 import { RECEIVE_PING_TIME } from './actions/socket';
+import { RECEIVE_TELEMETRY } from './actions/telemetry';
 
 const logger = createLogger({
-  predicate: (getState, action) => (action.type !== RECEIVE_PING_TIME)
+  predicate: (getState, action) => (action.type !== RECEIVE_PING_TIME && action.type !== RECEIVE_TELEMETRY)
 });
 
 const configureStore = () => (

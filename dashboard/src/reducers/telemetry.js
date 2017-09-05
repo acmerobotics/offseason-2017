@@ -2,7 +2,12 @@ import { RECEIVE_TELEMETRY } from '../actions/telemetry';
 
 const initialState = {
   timestamp: 0,
-  entries: []
+  captionValueSeparator: '',
+  itemSeparator: '',
+  lines: [],
+  log: {
+    lines: []
+  }
 };
 
 const telemetry = (state = initialState, action) => {
@@ -12,6 +17,12 @@ const telemetry = (state = initialState, action) => {
   default:
     return state;
   }
+};
+
+export const getAllItems = (telemetry) => {
+  return telemetry.lines.reduce((a, b) => (
+    a.concat(b.items)
+  ), []);
 };
 
 export default telemetry;

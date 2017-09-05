@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import TelemetryView from './TelemetryView';
 import Graph from './Graph';
 
 class GraphCanvas extends React.Component {
@@ -22,13 +21,15 @@ class GraphCanvas extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.props.keys.length > 0) {
+    if (this.props.items.length > 0) {
       this.graph.addData([
-        ...this.props.telemetry.entries
-          .filter(entry => (this.props.keys.indexOf(entry.name) !== -1)),
+        ...this.props.items.map(({ caption, value }) => ({
+          name: caption,
+          value: parseFloat(value)
+        })),
         {
           name: 'time',
-          value: this.props.telemetry.timestamp
+          value: this.props.timestamp
         }
       ]);
     }
@@ -62,9 +63,14 @@ class GraphCanvas extends React.Component {
   }
 }
 
+const itemPropType = PropTypes.shape({
+  caption: PropTypes.string,
+  value: PropTypes.string
+});
+
 GraphCanvas.propTypes = {
-  keys: PropTypes.arrayOf(PropTypes.string).isRequired,
-  telemetry: TelemetryView.propTypes.telemetry
+  timestamp: PropTypes.number.isRequired,
+  items: PropTypes.arrayOf(itemPropType).isRequired
 };
 
 export default GraphCanvas;

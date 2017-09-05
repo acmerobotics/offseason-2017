@@ -1,8 +1,9 @@
 package com.acmerobotics.library.dashboard.message;
 
-import com.acmerobotics.library.dashboard.Telemetry;
 import com.acmerobotics.library.dashboard.draw.Canvas;
 import com.google.gson.JsonArray;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * @author Ryan

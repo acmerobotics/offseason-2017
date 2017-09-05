@@ -1,9 +1,12 @@
 package com.acmerobotics.offseason.dashboard;
 
+import com.acmerobotics.library.dashboard.MultipleTelemetry;
 import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
+import java.util.Arrays;
 
 /**
  * @author Ryan
@@ -21,7 +24,7 @@ public class PIDTest extends OpMode {
     @Override
     public void init() {
         dashboard = RobotDashboard.getInstance();
-        dashboard.registerConfigClass(Constants.class);
+        telemetry = new MultipleTelemetry(Arrays.asList(telemetry, dashboard.getTelemetry()));
         motor = hardwareMap.dcMotor.get("motor");
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         maxRpm = motor.getMotorType().getMaxRPM();
@@ -34,9 +37,9 @@ public class PIDTest extends OpMode {
                 double speed = getSpeed();
                 double power = (60 * speed) / (maxRpm * ticksPerRev);
                 motor.setPower(Math.abs(power) > 0.2 ? power : 0);
-                dashboard.addTelemetry("power", power);
-                dashboard.addTelemetry("maxRpm", maxRpm);
-                dashboard.updateTelemetry();
+                telemetry.addData("power", power);
+                telemetry.addData("maxRpm", maxRpm);
+                telemetry.update();
             }
         });
 //        controller.setMaxSum(25);
@@ -60,11 +63,11 @@ public class PIDTest extends OpMode {
                 speed = 0;
             }
 
-            dashboard.addTelemetry("position", position);
-            dashboard.addTelemetry("setpoint", Constants.setpoint);
-            dashboard.addTelemetry("speed", speed);
-            dashboard.addTelemetry("maxSpeed", maxSpeed);
-            dashboard.addTelemetry("distanceLeft", distanceLeft);
+            telemetry.addData("position", position);
+            telemetry.addData("setpoint", Constants.setpoint);
+            telemetry.addData("speed", speed);
+            telemetry.addData("maxSpeed", maxSpeed);
+            telemetry.addData("distanceLeft", distanceLeft);
         }
         lastTime = time;
         lastSpeed = speed;
