@@ -1,5 +1,6 @@
 package com.acmerobotics.offseason.localization;
 
+import com.acmerobotics.library.dashboard.MultipleTelemetry;
 import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.acmerobotics.library.dashboard.draw.Canvas;
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,6 +65,7 @@ public class LocalizationDemo extends OpMode {
     @Override
     public void init() {
         dashboard = RobotDashboard.getInstance();
+        telemetry = new MultipleTelemetry(Arrays.asList(telemetry, dashboard.getTelemetry()));
 
         imu = new AdafruitBNO055IMU(hardwareMap.i2cDeviceSynch.get("imu"));
         BNO055IMU.Parameters imuParams = new BNO055IMU.Parameters();
@@ -200,9 +203,8 @@ public class LocalizationDemo extends OpMode {
                 );
         dashboard.drawOverlay();
 
-        dashboard.addTelemetry("vuforia", vuforiaLocation.toString());
-        dashboard.addTelemetry("dead_reckoning", deadReckoningLocation.toString());
-        dashboard.updateTelemetry();
+        telemetry.addData("vuforia", vuforiaLocation.toString());
+        telemetry.addData("dead_reckoning", deadReckoningLocation.toString());
 
         // simple arcade drive
         double axial = -gamepad1.left_stick_y;
