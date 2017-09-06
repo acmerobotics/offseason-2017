@@ -69,6 +69,7 @@ public class RobotDashboard {
             @Override
             public void processClass(Class clazz) {
                 if (clazz.isAnnotationPresent(Config.class)) {
+                	Log.i(TAG, String.format("Found config class %s", clazz.getCanonicalName()));
                     Config annotation = (Config) clazz.getAnnotation(Config.class);
                     String name = annotation.value().equals("") ? clazz.getSimpleName() : annotation.value();
                     optionGroups.add(new OptionGroup(clazz, name, prefs));

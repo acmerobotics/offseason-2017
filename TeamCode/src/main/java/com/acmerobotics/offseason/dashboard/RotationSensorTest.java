@@ -45,7 +45,7 @@ public class RotationSensorTest extends OpMode implements SensorEventListener {
         telemetry.addData("third", lastReading[2]);
         telemetry.addLine()
             .addData("test", "\u263A\u263A\u263A")
-            .addData("test2", "hello!");
+            .addData("test2", 2);
     }
 
     @Override

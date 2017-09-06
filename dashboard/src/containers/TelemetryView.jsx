@@ -5,23 +5,23 @@ import Heading from '../components/Heading';
 
 const TelemetryView = ({ telemetry }) => {
   const telemetryLines = telemetry.lines.map(line => (
-    <tr key={line.items[0].caption}>
+    <span key={line.items[0].caption}>
       {
         line.items.map(item => (
           `${item.caption}${telemetry.captionValueSeparator}${item.value}`
         )).join(telemetry.itemSeparator)
       }
-    </tr>
+      <br />
+    </span>
   ));
   const telemetryLog = telemetry.log.lines.map((line, i) => (
-    <tr key={i}>{line}</tr>
+    <span key={i}>{line}<br /></span>
   ));
   return (
     <div>
       <Heading level={2} text="Telemetry" />
-      <table>
-        <tbody>{telemetryLines}{telemetryLog}</tbody>
-      </table>
+      <p>{telemetryLines}</p>
+      <p>{telemetryLog}</p>
     </div>
   );
 };

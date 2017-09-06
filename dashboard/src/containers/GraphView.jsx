@@ -30,7 +30,8 @@ class GraphView extends Component {
   }
 
   handleDocumentKeydown(evt) {
-    if (!this.state.graphing && evt.code === 'Enter') {
+    console.log(evt.code);
+    if (!this.state.graphing && (evt.code === 'Enter' || evt.code === 'NumpadEnter')) {
       this.setState({
         graphing: true,
       });
@@ -68,7 +69,9 @@ class GraphView extends Component {
             :
             (
               <MultipleCheckbox
-                arr={this.props.items.map(item => item.caption)}
+                arr={this.props.items
+                  .filter(item => !isNaN(parseFloat(item.value)))
+                  .map(item => item.caption)}
                 onChange={selected => this.setState({ keys: selected })}
                 selected={this.state.keys} />
             )
