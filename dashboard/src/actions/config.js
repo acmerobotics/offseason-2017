@@ -1,11 +1,11 @@
-import { sendMessage, MessageType } from './socket';
-
 export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
+export const GET_CONFIG = 'GET_CONFIG';
+export const UPDATE_CONFIG = 'UPDATE_CONFIG';
 export const UPDATE_OPTION_VALUE = 'UPDATE_OPTION_VALUE';
 
 export const receiveConfig = (config) => ({
   type: RECEIVE_CONFIG,
-  config
+  data: config
 });
 
 export const updateOptionValue = (optionGroup, option, newValue) => ({
@@ -15,22 +15,15 @@ export const updateOptionValue = (optionGroup, option, newValue) => ({
   newValue
 });
 
-export const getConfig = () => (
-  (dispatch) => {
-    dispatch(sendMessage({
-      type: MessageType.GET,
-      data: 'config'
-    }));
-  }
-);
+export const getConfig = () => ({
+  type: GET_CONFIG
+});
 
-export const syncConfig = () => (
-  (dispatch, getState) => {
-    dispatch(sendMessage({
-      type: MessageType.UPDATE,
-      data: {
-        config: getState().config
-      }
-    }));
-  }
+export const updateConfig = () => (
+  (dispatch, getState) => (
+    dispatch({
+      type: UPDATE_CONFIG,
+      data: getState().config
+    })
+  )
 );

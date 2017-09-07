@@ -5,7 +5,7 @@ import ConfigOptionGroup from './ConfigOptionGroup';
 import Heading from '../components/Heading';
 import IconGroup from '../components/IconGroup';
 import Icon from '../components/Icon';
-import { getConfig, syncConfig } from '../actions/config';
+import { getConfig, updateConfig } from '../actions/config';
 
 const ConfigView = ({ config, onRefresh, onSave }) => (
   <div>
@@ -42,7 +42,7 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(getConfig());
   },
   onSave: () => {
-    dispatch(syncConfig());
+    dispatch(updateConfig());
   }
 });
 

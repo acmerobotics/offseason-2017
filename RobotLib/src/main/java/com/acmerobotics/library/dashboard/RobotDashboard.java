@@ -8,7 +8,6 @@ import com.acmerobotics.library.dashboard.draw.Canvas;
 import com.acmerobotics.library.dashboard.message.Message;
 import com.acmerobotics.library.dashboard.message.MessageDeserializer;
 import com.acmerobotics.library.dashboard.message.MessageType;
-import com.acmerobotics.library.dashboard.message.UpdateMessageData;
 import com.acmerobotics.library.dashboard.util.ClassFilter;
 import com.acmerobotics.library.dashboard.util.ClasspathScanner;
 import com.google.gson.Gson;
@@ -92,7 +91,7 @@ public class RobotDashboard {
 
 	public void registerConfigClass(Class<?> configClass, String name) {
 	    optionGroups.add(new OptionGroup(configClass, name, prefs));
-	    sendAll(getConfigUpdateMessage());
+	    sendAll(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
     }
 
     public void registerConfigClass(Class<?> configClass) {
@@ -108,7 +107,7 @@ public class RobotDashboard {
     }
 
     public void drawOverlay() {
-        sendAll(getFieldOverlayUpdateMessage());
+        sendAll(new Message(MessageType.RECEIVE_FIELD_OVERLAY, fieldOverlay));
         fieldOverlay.clear();
     }
 
@@ -130,14 +129,6 @@ public class RobotDashboard {
         }
     }
 
-	public Message getFieldOverlayUpdateMessage() {
-	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().fieldOverlay(fieldOverlay).build());
-	}
-
-    public Message getConfigUpdateMessage() {
-	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().config(getConfigJson()).build());
-    }
-
 	public synchronized void sendAll(Message message) {
 		for (RobotWebSocket ws : sockets) {
 			ws.send(message);
@@ -146,7 +137,7 @@ public class RobotDashboard {
 
 	public synchronized void addSocket(RobotWebSocket socket) {
 		sockets.add(socket);
-		socket.send(getConfigUpdateMessage());
+		socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
 	}
 
 	public synchronized void removeSocket(RobotWebSocket socket) {
@@ -155,16 +146,12 @@ public class RobotDashboard {
 
 	public synchronized void onMessage(RobotWebSocket socket, Message msg) {
         switch(msg.getType()) {
-            case GET: {
-                String data = (String) msg.getData();
-                if (data.equals("config")) {
-                    socket.send(getConfigUpdateMessage());
-                }
+            case GET_CONFIG: {
+                socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
                 break;
             }
-            case UPDATE: {
-                UpdateMessageData data = (UpdateMessageData) msg.getData();
-                updateConfigWithJson(data.getConfig());
+            case UPDATE_CONFIG: {
+                updateConfigWithJson((JsonElement) msg.getData());
                 break;
             }
             default:
