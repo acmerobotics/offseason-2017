@@ -1,5 +1,6 @@
 package com.acmerobotics.velocityvortex.opmodes;
 
+import com.acmerobotics.library.dashboard.MultipleTelemetry;
 import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.acmerobotics.velocityvortex.drive.EnhancedMecanumDrive;
 import com.acmerobotics.velocityvortex.drive.MecanumDrive;
@@ -17,6 +18,8 @@ import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+import java.util.Arrays;
 
 @TeleOp(name = "VV TeleOp", group = "TeleOp")
 public class MainTeleOp extends OpMode {
@@ -53,6 +56,7 @@ public class MainTeleOp extends OpMode {
     @Override
     public void init() {
         dashboard = RobotDashboard.getInstance();
+        telemetry = new MultipleTelemetry(Arrays.asList(telemetry, dashboard.getTelemetry()));
 
         hardwareMap.dcMotor.get("leftFront").setDirection(DcMotorSimple.Direction.REVERSE);
         hardwareMap.dcMotor.get("leftBack").setDirection(DcMotorSimple.Direction.REVERSE);
@@ -192,18 +196,7 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("heading", drive.getHeading());
         telemetry.addData("leftSpeed", launcher.getLeftSpeed());
         telemetry.addData("rightSpeed", launcher.getRightSpeed());
-
-        dashboard.addTelemetry("time", System.currentTimeMillis());
-        dashboard.addTelemetry("leftSpeed", launcher.getLeftSpeed());
-        dashboard.addTelemetry("rightSpeed", launcher.getRightSpeed());
-        dashboard.addTelemetry("launcherVoltage", launcher.getVoltage());
-        dashboard.addTelemetry("pusherPosition", beaconPusher.getCurrentPosition());
-    }
-
-    @Override
-    public void internalPostLoop() {
-        super.internalPostLoop();
-
-        dashboard.updateTelemetry();
+        telemetry.addData("launcherVoltage", launcher.getVoltage());
+        telemetry.addData("pusherPosition", beaconPusher.getCurrentPosition());
     }
 }

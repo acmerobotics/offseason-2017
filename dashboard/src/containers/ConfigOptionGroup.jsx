@@ -9,7 +9,7 @@ class ConfigOptionGroup extends React.Component {
     super(props);
 
     this.state = {
-      expanded: true
+      expanded: false
     };
 
     this.toggleVisibility = this.toggleVisibility.bind(this);

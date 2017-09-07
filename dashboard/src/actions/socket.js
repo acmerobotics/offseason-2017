@@ -1,15 +1,10 @@
-export const MessageType = {
-  GET: 'get',
-  PONG: 'pong',
-  PING: 'ping',
-  UPDATE: 'update'
-};
-
 export const CONNECT = 'CONNECT';
 export const DISCONNECT = 'DISCONNECT';
 export const RECEIVE_PING_TIME = 'RECEIVE_PING_TIME';
 export const RECEIVE_CONNECTION_STATUS = 'RECEIVE_CONNECTION_STATUS';
 export const SEND_MESSAGE = 'SEND_MESSAGE';
+export const PING = 'PING';
+export const PONG = 'PONG';
 
 export const connect = (host, port) => ({
   type: CONNECT,
@@ -31,7 +26,6 @@ export const receiveConnectionStatus = (isConnected) => ({
   isConnected
 });
 
-export const sendMessage = (message) => ({
-  type: SEND_MESSAGE,
-  message
+export const ping = () => ({
+  type: PING
 });

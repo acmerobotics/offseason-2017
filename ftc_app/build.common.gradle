@@ -104,5 +104,4 @@ repositories {
         dirs rootProject.file('ftc_app/libs')
     }
 }
-
 apply from: 'build.release.gradle'

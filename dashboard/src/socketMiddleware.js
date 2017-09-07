@@ -1,20 +1,21 @@
 import {
   CONNECT,
   DISCONNECT,
-  SEND_MESSAGE,
+  PING,
+  PONG,
+  ping,
   connect,
   receiveConnectionStatus,
-  receivePingTime,
-  sendMessage,
-  MessageType
+  receivePingTime
 } from './actions/socket';
-import { receiveTelemetry } from './actions/telemetry';
-import { receiveConfig } from './actions/config';
-import { receiveFieldOverlay } from './actions/fieldOverlay';
+import {
+  GET_CONFIG,
+  UPDATE_CONFIG
+} from './actions/config';
 
 let socket, pingSentTime;
 
-export const ping = () => (
+export const pingLoop = () => (
   (dispatch, getState) => {
     const { isConnected } = getState().socket;
 
@@ -24,12 +25,10 @@ export const ping = () => (
 
     pingSentTime = Date.now();
 
-    dispatch(sendMessage({
-      type: MessageType.PING
-    }));
+    dispatch(ping());
 
     setTimeout(() => {
-      dispatch(ping());
+      dispatch(pingLoop());
     }, 1000);
   }
 );
@@ -41,40 +40,13 @@ const socketMiddleware = store => next => action => {
 
     socket.onmessage = (evt) => {
       const msg = JSON.parse(evt.data);
-      switch (msg.type) {
-      case MessageType.PONG: {
-        const pingTime = Date.now() - pingSentTime;
-        store.dispatch(receivePingTime(pingTime));
-        break;
-      }
-      case MessageType.UPDATE: {
-        const { data } = msg;
-
-        if (data.telemetry) {
-          store.dispatch(receiveTelemetry(data.telemetry));
-        }
-
-        if (data.config) {
-          store.dispatch(receiveConfig(data.config));
-        }
-
-        if (data.fieldOverlay) {
-          store.dispatch(receiveFieldOverlay(data.fieldOverlay));
-        }
-
-        break;
-      }
-      default:
-        console.log(`unknown message of type '${msg.type}' received`);
-        console.log(msg);
-        break;
-      }
+      store.dispatch(msg);
     };
 
     socket.onopen = () => {
       store.dispatch(receiveConnectionStatus(true));
 
-      store.dispatch(ping());
+      store.dispatch(pingLoop());
     };
 
     socket.onclose = () => {
@@ -87,11 +59,18 @@ const socketMiddleware = store => next => action => {
   case DISCONNECT:
     socket.close();
     break;
-  case SEND_MESSAGE: {
+  case PONG: {
+    const pingTime = Date.now() - pingSentTime;
+    store.dispatch(receivePingTime(pingTime));
+    break;
+  }
+  case PING:
+  case GET_CONFIG:
+  case UPDATE_CONFIG: {
     const { isConnected } = store.getState().socket;
 
     if (isConnected) {
-      socket.send(JSON.stringify(action.message));
+      socket.send(JSON.stringify(action));
     }
 
     break;

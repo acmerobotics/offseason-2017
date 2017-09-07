@@ -8,7 +8,6 @@ import com.acmerobotics.library.dashboard.draw.Canvas;
 import com.acmerobotics.library.dashboard.message.Message;
 import com.acmerobotics.library.dashboard.message.MessageDeserializer;
 import com.acmerobotics.library.dashboard.message.MessageType;
-import com.acmerobotics.library.dashboard.message.UpdateMessageData;
 import com.acmerobotics.library.dashboard.util.ClassFilter;
 import com.acmerobotics.library.dashboard.util.ClasspathScanner;
 import com.google.gson.Gson;
@@ -18,6 +17,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.qualcomm.robotcore.eventloop.EventLoop;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class RobotDashboard {
 		return dashboard;
 	};
 
-	private Telemetry telemetry;
+	private DashboardTelemetry telemetry;
 	private SharedPreferences prefs;
 	private List<RobotWebSocket> sockets;
 	private RobotWebSocketServer server;
@@ -54,9 +55,9 @@ public class RobotDashboard {
 	private RobotDashboard(Context ctx) {
 		prefs = ctx.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
-		telemetry = new Telemetry();
 		fieldOverlay = new Canvas();
 		optionGroups = new ArrayList<>();
+		telemetry = new DashboardTelemetry(this);
 
         ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
             @Override
@@ -67,6 +68,7 @@ public class RobotDashboard {
             @Override
             public void processClass(Class clazz) {
                 if (clazz.isAnnotationPresent(Config.class)) {
+                	Log.i(TAG, String.format("Found config class %s", clazz.getCanonicalName()));
                     Config annotation = (Config) clazz.getAnnotation(Config.class);
                     String name = annotation.value().equals("") ? clazz.getSimpleName() : annotation.value();
                     optionGroups.add(new OptionGroup(clazz, name, prefs));
@@ -83,39 +85,21 @@ public class RobotDashboard {
 		}
 	}
 
+	public void resetConfigurationForOpMode() {
+		telemetry.resetTelemetryForOpMode();
+	}
+
 	public void registerConfigClass(Class<?> configClass, String name) {
 	    optionGroups.add(new OptionGroup(configClass, name, prefs));
-	    sendAll(getConfigUpdateMessage());
+	    sendAll(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
     }
 
     public void registerConfigClass(Class<?> configClass) {
 	    registerConfigClass(configClass, configClass.getSimpleName());
     }
 
-    public void addTelemetry(String key, String value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, boolean value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, int value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, double value) {
-        addTelemetry(key, new JsonPrimitive(value));
-    }
-
-    public void addTelemetry(String key, JsonElement element) {
-        telemetry.addEntry(new Telemetry.Entry(key, element));
-    }
-
-    public void updateTelemetry() {
-	    telemetry.updateTimestamp();
-        sendAll(getTelemetryUpdateMessage());
-        telemetry.clear();
+    public Telemetry getTelemetry() {
+	    return telemetry;
     }
 
     public Canvas getFieldOverlay() {
@@ -123,7 +107,7 @@ public class RobotDashboard {
     }
 
     public void drawOverlay() {
-        sendAll(getFieldOverlayUpdateMessage());
+        sendAll(new Message(MessageType.RECEIVE_FIELD_OVERLAY, fieldOverlay));
         fieldOverlay.clear();
     }
 
@@ -145,18 +129,6 @@ public class RobotDashboard {
         }
     }
 
-	public Message getFieldOverlayUpdateMessage() {
-	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().fieldOverlay(fieldOverlay).build());
-	}
-
-    public Message getConfigUpdateMessage() {
-	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().config(getConfigJson()).build());
-    }
-
-	private Message getTelemetryUpdateMessage() {
-		return new Message(MessageType.UPDATE, UpdateMessageData.builder().telemetry(telemetry).build());
-	}
-
 	public synchronized void sendAll(Message message) {
 		for (RobotWebSocket ws : sockets) {
 			ws.send(message);
@@ -165,7 +137,7 @@ public class RobotDashboard {
 
 	public synchronized void addSocket(RobotWebSocket socket) {
 		sockets.add(socket);
-		socket.send(getConfigUpdateMessage());
+		socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
 	}
 
 	public synchronized void removeSocket(RobotWebSocket socket) {
@@ -174,18 +146,12 @@ public class RobotDashboard {
 
 	public synchronized void onMessage(RobotWebSocket socket, Message msg) {
         switch(msg.getType()) {
-            case GET: {
-                String data = (String) msg.getData();
-                if (data.equals("config")) {
-                    socket.send(getConfigUpdateMessage());
-                } else if (data.equals("telemetry")) {
-                    socket.send(getTelemetryUpdateMessage());
-                }
+            case GET_CONFIG: {
+                socket.send(new Message(MessageType.RECEIVE_CONFIG, getConfigJson()));
                 break;
             }
-            case UPDATE: {
-                UpdateMessageData data = (UpdateMessageData) msg.getData();
-                updateConfigWithJson(data.getConfig());
+            case UPDATE_CONFIG: {
+                updateConfigWithJson((JsonElement) msg.getData());
                 break;
             }
             default:

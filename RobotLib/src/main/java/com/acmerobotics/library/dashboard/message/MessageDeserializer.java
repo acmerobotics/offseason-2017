@@ -1,8 +1,5 @@
 package com.acmerobotics.library.dashboard.message;
 
-import android.util.Log;
-
-import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -22,15 +19,12 @@ public class MessageDeserializer implements JsonDeserializer<Message> {
         String messageTypeString = messageObj.get("type").getAsString();
         MessageType messageType = EnumUtil.fromValue(messageTypeString, MessageType.class);
         JsonElement data = messageObj.get("data");
-        switch (messageType) {
-            case UPDATE:
-                return new Message(messageType, jsonDeserializationContext.deserialize(data, UpdateMessageData.class));
-            case GET:
-                return new Message(messageType, jsonDeserializationContext.deserialize(data, String.class));
-            default:
-                Log.w(RobotDashboard.TAG, String.format("Unknown message type: %s (%s)", messageType, messageTypeString));
-            case PING:
-                return new Message(messageType);
+        if (data == null) {
+            return new Message(messageType);
+        } else if (messageType == MessageType.UPDATE_CONFIG) {
+            return new Message(messageType, data);
+        } else {
+            throw new RuntimeException("Illegal message: " + messageTypeString);
         }
     }
 }

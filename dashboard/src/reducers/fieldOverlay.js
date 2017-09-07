@@ -7,7 +7,7 @@ const initialState = {
 const fieldOverlay = (state = initialState, action) => {
   switch (action.type) {
   case RECEIVE_FIELD_OVERLAY:
-    return action.fieldOverlay;
+    return action.data;
   default:
     return state;
   }

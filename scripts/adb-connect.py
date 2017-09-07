@@ -7,6 +7,7 @@ RC_PACKAGE = 'com.qualcomm.ftcrobotcontroller'
 RC_ACTIVITY = 'org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity'
 ADB_PORT = 5555
 PROFILE_FILENAME = 'temp.xml'
+WIFI_DIRECT_PREFIX = 'DIRECT-xx-'
 
 PROFILE_XML = '''<?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
@@ -111,23 +112,25 @@ if __name__ == '__main__':
         print('Failure: unable to start robot controller')
         sys.exit(-1)
     print('Scanning logcat for passphrase')
-    passphrase = None
+    passphrase, wifi_name = None, None
     proc = Popen(['adb', 'logcat'], stdout=PIPE, universal_newlines=True, encoding='utf-8')
     for line in iter(proc.stdout.readline, ''):
         if 'passphrase' in line.lower():
             passphrase = line.split()[-1]
+        if 'device information' in line.lower():
+            wifi_name = line.split()[-2]
+        if not (passphrase is None or wifi_name is None):
             break
     proc.kill()
     print('Got WiFi passphrase: {}'.format(passphrase))
-    while True:
+    print('Got WiFi direct name: {}'.format(wifi_name))
+    searching = True
+    while searching:
         networks = list_wifi_networks()
-        print('Available networks:')
-        for i, network in enumerate(networks):
-            print('{}: {}'.format(i, network))
-        network_input = input('Select network: ')
-        if network_input != '':
-            connect_to_wifi_network(networks[int(network_input)], passphrase)
-            break
+        for network in networks:
+            if network[len(WIFI_DIRECT_PREFIX):] == wifi_name:
+                connect_to_wifi_network(network, passphrase)
+                searching = False
     print('Connecting over wireless ADB')
     run(['adb', 'tcpip', str(ADB_PORT)], stdout=DEVNULL)
     run(['adb', 'connect', '192.168.49.1:{}'.format(ADB_PORT)], stdout=DEVNULL)

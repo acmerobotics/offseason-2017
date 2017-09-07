@@ -5,7 +5,7 @@ const initialState = [];
 const config = (state = initialState, action) => {
   switch (action.type) {
   case RECEIVE_CONFIG:
-    return action.config;
+    return action.data;
   case UPDATE_OPTION_VALUE: {
     const { option, newValue } = action;
 
