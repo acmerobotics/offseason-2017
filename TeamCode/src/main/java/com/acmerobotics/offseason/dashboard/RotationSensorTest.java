@@ -29,6 +29,7 @@ public class RotationSensorTest extends OpMode implements SensorEventListener {
     public void init() {
         Log.i("DashboardThread", Thread.currentThread().getName());
         dashboard = RobotDashboard.getInstance();
+        dashboard.resetConfigurationForOpMode();
         telemetry = new MultipleTelemetry(Arrays.asList(telemetry, dashboard.getTelemetry()));
         SensorManager manager = (SensorManager) hardwareMap.appContext.getSystemService(Context.SENSOR_SERVICE);
         sensor = manager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);

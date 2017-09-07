@@ -2,6 +2,10 @@ package com.acmerobotics.library.dashboard;
 
 import android.support.annotation.Nullable;
 
+import com.acmerobotics.library.dashboard.message.Message;
+import com.acmerobotics.library.dashboard.message.MessageType;
+import com.acmerobotics.library.dashboard.message.UpdateMessageData;
+
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -251,7 +255,7 @@ public class DashboardTelemetry implements Telemetry {
 
     @Override
     public void clearAll() {
-        this.lines.clear();
+        clear();
     }
 
     @Override
@@ -267,9 +271,10 @@ public class DashboardTelemetry implements Telemetry {
     @Override
     public boolean update() {
         this.timestamp = System.currentTimeMillis();
-        dashboard.sendAll(dashboard.getTelemetryUpdateMessage());
-        // TODO actually pay attention to auto clear
-        clearAll();
+        dashboard.sendAll(getTelemetryUpdateMessage());
+        if (autoClear) {
+            clear();
+        }
         // TODO
         return true;
     }
@@ -334,5 +339,9 @@ public class DashboardTelemetry implements Telemetry {
     @Override
     public Log log() {
         return this.log;
+    }
+
+    public Message getTelemetryUpdateMessage() {
+        return new Message(MessageType.UPDATE, UpdateMessageData.builder().telemetry(this).build());
     }
 }

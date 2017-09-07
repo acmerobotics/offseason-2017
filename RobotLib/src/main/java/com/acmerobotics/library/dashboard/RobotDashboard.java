@@ -56,9 +56,9 @@ public class RobotDashboard {
 	private RobotDashboard(Context ctx) {
 		prefs = ctx.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE);
 		sockets = new ArrayList<>();
-		telemetry = new DashboardTelemetry(this);
 		fieldOverlay = new Canvas();
 		optionGroups = new ArrayList<>();
+		telemetry = new DashboardTelemetry(this);
 
         ClasspathScanner scanner = new ClasspathScanner(new ClassFilter() {
             @Override
@@ -84,6 +84,10 @@ public class RobotDashboard {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void resetConfigurationForOpMode() {
+		telemetry.resetTelemetryForOpMode();
 	}
 
 	public void registerConfigClass(Class<?> configClass, String name) {
@@ -134,10 +138,6 @@ public class RobotDashboard {
 	    return new Message(MessageType.UPDATE, UpdateMessageData.builder().config(getConfigJson()).build());
     }
 
-	public Message getTelemetryUpdateMessage() {
-		return new Message(MessageType.UPDATE, UpdateMessageData.builder().telemetry(telemetry).build());
-	}
-
 	public synchronized void sendAll(Message message) {
 		for (RobotWebSocket ws : sockets) {
 			ws.send(message);
@@ -159,8 +159,6 @@ public class RobotDashboard {
                 String data = (String) msg.getData();
                 if (data.equals("config")) {
                     socket.send(getConfigUpdateMessage());
-                } else if (data.equals("telemetry")) {
-                    socket.send(getTelemetryUpdateMessage());
                 }
                 break;
             }
