@@ -26,37 +26,37 @@ public class DashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public int getCapacity() {
+        public synchronized int getCapacity() {
             return this.capacity;
         }
 
         @Override
-        public void setCapacity(int capacity) {
+        public synchronized void setCapacity(int capacity) {
             this.capacity = capacity;
         }
 
         @Override
-        public DisplayOrder getDisplayOrder() {
+        public synchronized DisplayOrder getDisplayOrder() {
             return this.displayOrder;
         }
 
         @Override
-        public void setDisplayOrder(DisplayOrder displayOrder) {
+        public synchronized void setDisplayOrder(DisplayOrder displayOrder) {
             this.displayOrder = displayOrder;
         }
 
         @Override
-        public void add(String line) {
+        public synchronized void add(String line) {
             this.lines.add(line);
         }
 
         @Override
-        public void add(String line, Object... objects) {
+        public synchronized void add(String line, Object... objects) {
             this.add(String.format(line, objects));
         }
 
         @Override
-        public void clear() {
+        public synchronized void clear() {
             this.lines.clear();
         }
     }
@@ -69,7 +69,7 @@ public class DashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public Item addData(String caption, String value, Object... objects) {
+        public synchronized Item addData(String caption, String value, Object... objects) {
             ItemImpl item = new ItemImpl(this);
             item.setCaption(caption);
             item.setValue(value, objects);
@@ -78,7 +78,7 @@ public class DashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public Item addData(String caption, Object value) {
+        public synchronized Item addData(String caption, Object value) {
             ItemImpl item = new ItemImpl(this);
             item.setCaption(caption);
             item.setValue(value);
@@ -87,7 +87,7 @@ public class DashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public <T> Item addData(String caption, Func<T> func) {
+        public synchronized <T> Item addData(String caption, Func<T> func) {
             ItemImpl item = new ItemImpl(this);
             item.setCaption(caption);
             item.setValue(func);
@@ -96,7 +96,7 @@ public class DashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public <T> Item addData(String caption, String value, Func<T> func) {
+        public synchronized <T> Item addData(String caption, String value, Func<T> func) {
             ItemImpl item = new ItemImpl(this);
             item.setCaption(caption);
             item.setValue(value, value, func);
@@ -107,6 +107,7 @@ public class DashboardTelemetry implements Telemetry {
 
     public class ItemImpl implements Item {
         private transient Line parent;
+        private transient boolean retained;
 
         private String caption, value;
 
@@ -115,67 +116,68 @@ public class DashboardTelemetry implements Telemetry {
         }
 
         @Override
-        public String getCaption() {
+        public synchronized String getCaption() {
             return this.caption;
         }
 
         @Override
-        public Item setCaption(String caption) {
+        public synchronized Item setCaption(String caption) {
             this.caption = caption;
             return this;
         }
 
         @Override
-        public Item setValue(String value, Object... objects) {
+        public synchronized Item setValue(String value, Object... objects) {
             return setValue(String.format(value, objects));
         }
 
         @Override
-        public Item setValue(Object value) {
+        public synchronized Item setValue(Object value) {
             this.value = value.toString();
             return this;
         }
 
         @Override
-        public <T> Item setValue(final Func<T> func) {
+        public synchronized <T> Item setValue(final Func<T> func) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public <T> Item setValue(final String caption, final Func<T> func) {
+        public synchronized <T> Item setValue(final String caption, final Func<T> func) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Item setRetained(@Nullable Boolean aBoolean) {
-            throw new UnsupportedOperationException();
+        public synchronized Item setRetained(@Nullable Boolean aBoolean) {
+            this.retained = aBoolean.booleanValue();
+            return this;
         }
 
         @Override
-        public boolean isRetained() {
-            throw new UnsupportedOperationException();
+        public synchronized boolean isRetained() {
+            return this.retained;
         }
 
         @Override
-        public Item addData(String caption, String value, Object... objects) {
+        public synchronized Item addData(String caption, String value, Object... objects) {
             this.parent.addData(caption, value, objects);
             return this;
         }
 
         @Override
-        public Item addData(String caption, Object value) {
+        public synchronized Item addData(String caption, Object value) {
             this.parent.addData(caption, value);
             return this;
         }
 
         @Override
-        public <T> Item addData(String caption, Func<T> func) {
+        public synchronized <T> Item addData(String caption, Func<T> func) {
             this.parent.addData(caption, func);
             return this;
         }
 
         @Override
-        public <T> Item addData(String caption, String value, Func<T> func) {
+        public synchronized <T> Item addData(String caption, String value, Func<T> func) {
             this.parent.addData(caption, value, func);
             return this;
         }
@@ -184,7 +186,7 @@ public class DashboardTelemetry implements Telemetry {
     private transient RobotDashboard dashboard;
 
     protected long timestamp;
-    protected List<Line> lines;
+    protected List<LineImpl> lines;
     protected LogImpl log;
     protected transient boolean autoClear;
     protected transient int msTransmissionInterval;
@@ -196,7 +198,7 @@ public class DashboardTelemetry implements Telemetry {
         resetTelemetryForOpMode();
     }
 
-    public void resetTelemetryForOpMode() {
+    public synchronized void resetTelemetryForOpMode() {
         this.lines = new ArrayList<>();
         this.log = new LogImpl();
         this.autoClear = true;
@@ -206,7 +208,7 @@ public class DashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public Item addData(String caption, String value, Object... objects) {
+    public synchronized Item addData(String caption, String value, Object... objects) {
         LineImpl line = new LineImpl();
         Item item = line.addData(caption, value, objects);
         this.lines.add(line);
@@ -214,7 +216,7 @@ public class DashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public Item addData(String caption, Object value) {
+    public synchronized Item addData(String caption, Object value) {
         LineImpl line = new LineImpl();
         Item item = line.addData(caption, value);
         this.lines.add(line);
@@ -222,7 +224,7 @@ public class DashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public <T> Item addData(String caption, Func<T> func) {
+    public synchronized <T> Item addData(String caption, Func<T> func) {
         LineImpl line = new LineImpl();
         Item item = line.addData(caption, func);
         this.lines.add(line);
@@ -230,7 +232,7 @@ public class DashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public <T> Item addData(String caption, String value, Func<T> func) {
+    public synchronized <T> Item addData(String caption, String value, Func<T> func) {
         LineImpl line = new LineImpl();
         Item item = line.addData(caption, value, func);
         this.lines.add(line);
@@ -238,7 +240,7 @@ public class DashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public boolean removeItem(Item item) {
+    public synchronized boolean removeItem(Item item) {
         for (Line line : lines) {
             if (line instanceof LineImpl && ((LineImpl) line).items.remove(item)) {
                 return true;
@@ -248,95 +250,114 @@ public class DashboardTelemetry implements Telemetry {
     }
 
     @Override
-    public void clear() {
+    public synchronized void clear() {
+        int i = 0;
+        while (i < this.lines.size()) {
+            LineImpl line = this.lines.get(i);
+            boolean keepLine = false;
+            int j = 0;
+            while (j < line.items.size()) {
+                ItemImpl item = line.items.get(j);
+                if (item.isRetained()) {
+                    keepLine = true;
+                    j++;
+                } else {
+                    line.items.remove(j);
+                }
+            }
+            if (!keepLine) {
+                this.lines.remove(i);
+            } else {
+                i++;
+            }
+        }
+    }
+
+    @Override
+    public synchronized void clearAll() {
         this.lines.clear();
+        this.log.clear();
     }
 
     @Override
-    public void clearAll() {
-        clear();
-    }
-
-    @Override
-    public Object addAction(Runnable runnable) {
+    public synchronized Object addAction(Runnable runnable) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeAction(Object action) {
+    public synchronized boolean removeAction(Object action) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean update() {
+    public synchronized boolean update() {
         this.timestamp = System.currentTimeMillis();
         dashboard.sendAll(new Message(MessageType.RECEIVE_TELEMETRY, this));
         if (autoClear) {
             clear();
         }
-        // TODO
         return true;
     }
 
     @Override
-    public Line addLine() {
+    public synchronized Line addLine() {
         LineImpl line = new LineImpl();
         this.lines.add(line);
         return line;
     }
 
     @Override
-    public Line addLine(String caption) {
+    public synchronized Line addLine(String caption) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeLine(Line line) {
+    public synchronized boolean removeLine(Line line) {
         return this.lines.remove(line);
     }
 
     @Override
-    public boolean isAutoClear() {
+    public synchronized boolean isAutoClear() {
         return this.autoClear;
     }
 
     @Override
-    public void setAutoClear(boolean autoClear) {
+    public synchronized void setAutoClear(boolean autoClear) {
         this.autoClear = autoClear;
     }
 
     @Override
-    public int getMsTransmissionInterval() {
+    public synchronized int getMsTransmissionInterval() {
         return msTransmissionInterval;
     }
 
     @Override
-    public void setMsTransmissionInterval(int msTransmissionInterval) {
+    public synchronized void setMsTransmissionInterval(int msTransmissionInterval) {
         this.msTransmissionInterval = msTransmissionInterval;
     }
 
     @Override
-    public String getItemSeparator() {
+    public synchronized String getItemSeparator() {
         return this.itemSeparator;
     }
 
     @Override
-    public void setItemSeparator(String itemSeparator) {
+    public synchronized void setItemSeparator(String itemSeparator) {
         this.itemSeparator = itemSeparator;
     }
 
     @Override
-    public String getCaptionValueSeparator() {
+    public synchronized String getCaptionValueSeparator() {
         return this.captionValueSeparator;
     }
 
     @Override
-    public void setCaptionValueSeparator(String captionValueSeparator) {
+    public synchronized void setCaptionValueSeparator(String captionValueSeparator) {
         this.captionValueSeparator = captionValueSeparator;
     }
 
     @Override
-    public Log log() {
+    public synchronized Log log() {
         return this.log;
     }
 }

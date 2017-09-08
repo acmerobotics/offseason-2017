@@ -24,8 +24,9 @@ public class PIDTest extends OpMode {
     @Override
     public void init() {
         dashboard = RobotDashboard.getInstance();
+        dashboard.resetConfigurationForOpMode();
         telemetry = new MultipleTelemetry(Arrays.asList(telemetry, dashboard.getTelemetry()));
-        motor = hardwareMap.dcMotor.get("motor");
+        motor = hardwareMap.dcMotor.get("launcherLeft");
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         maxRpm = motor.getMotorType().getMaxRPM();
         ticksPerRev = motor.getMotorType().getTicksPerRev();
@@ -79,6 +80,11 @@ public class PIDTest extends OpMode {
         if (!looper.isAlive()) {
             looper.start();
         }
+    }
+
+    @Override
+    public void internalPostLoop() {
+        // do nothing
     }
 
     @Override
