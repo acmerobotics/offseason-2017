@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "Time Test", group = "Test")
 public class TimeTest extends LinearOpMode {
-    public static final long TEST_NS = TimeUnit.MILLISECONDS.toNanos(5000);
+    public static final long TEST_NS = TimeUnit.MILLISECONDS.toNanos(20000);
     public static final long LOOP_MS = TimeUnit.MILLISECONDS.toNanos(2);
     public static final int NUM_READINGS = (int) (TEST_NS / LOOP_MS);
 
@@ -92,6 +92,10 @@ public class TimeTest extends LinearOpMode {
         if (testMotor == null) {
             return;
         }
+
+        telemetry.clearAll();
+        telemetry.update();
+
         testMotor.setPower(1);
 
         Thread.sleep(1000);
@@ -100,19 +104,30 @@ public class TimeTest extends LinearOpMode {
         double[] readings = new double[NUM_READINGS];
         for (int i = 0; i < readings.length; i++) {
             readings[i] = testMotor.getCurrentPosition();
-            long loopEndTime = startTime + (i + 1) * TEST_NS;
+            long loopEndTime = startTime + ((i + 1) * LOOP_MS);
             while (System.nanoTime() < loopEndTime) {
                 Thread.sleep(0, 100);
+            }
+            if (i % 1000 == 0) {
+                telemetry.log().add("finished up to " + i);
+                telemetry.update();
             }
         }
 
         testMotor.setPower(0);
 
-        List<Double> deltas = getValueChangeDeltas(readings, TEST_NS);
+        List<Double> deltas = getValueChangeDeltas(readings, LOOP_MS);
+        telemetry.log().add("got " + deltas.size() + " deltas");
         double mean = getMean(deltas);
         double variance = getVariance(deltas, mean);
         double stddev = Math.sqrt(variance);
-        telemetry.log().add("Motor test deltas\tmean: %fns\tstddev: %fns", mean, stddev);
+        telemetry.log().add("mean: %dms  stddev: %dms",
+                TimeUnit.NANOSECONDS.toMillis((long) mean),
+                TimeUnit.NANOSECONDS.toMillis((long) stddev));
         telemetry.update();
+
+        while (opModeIsActive()) {
+            idle();
+        }
     }
 }
