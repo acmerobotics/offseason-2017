@@ -28,10 +28,16 @@
  */
 package com.acmerobotics.relicrecovery.opmodes;
 
+import android.os.Environment;
+import android.util.Log;
+
 import com.acmerobotics.library.dashboard.MultipleTelemetry;
 import com.acmerobotics.library.dashboard.RobotDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.vuforia.Image;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.ConceptVuforiaNavigation;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -47,8 +53,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * This OpMode illustrates the basics of using the Vuforia engine to determine
@@ -75,6 +92,10 @@ public class VuMarkIdentification extends LinearOpMode {
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;
+    private Mat raw, rgb;
+    private byte[] imgData;
+    private CountDownLatch openCvInitialized = new CountDownLatch(1);
+    private File imageSaveLocation;
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -82,8 +103,35 @@ public class VuMarkIdentification extends LinearOpMode {
      */
     VuforiaLocalizer vuforia;
 
-    @Override public void runOpMode() {
+    BlockingQueue<VuforiaLocalizer.CloseableFrame> frameQueue;
+
+    @Override public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(Arrays.asList(telemetry, RobotDashboard.getInstance().getTelemetry()));
+
+        imageSaveLocation = new File(Environment.getExternalStorageDirectory(), "ACME");
+        imageSaveLocation.mkdirs();
+
+        BaseLoaderCallback loaderCallback = new BaseLoaderCallback(hardwareMap.appContext) {
+            @Override
+            public void onManagerConnected(int status) {
+                switch (status) {
+                    case LoaderCallbackInterface.SUCCESS:
+                    {
+                        Log.i(TAG, "OpenCV loaded successfully");
+                        openCvInitialized.countDown();
+                    } break;
+                    default:
+                    {
+                        super.onManagerConnected(status);
+                    } break;
+                }
+            }
+        };
+
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_3_0, hardwareMap.appContext, loaderCallback);
+
+        Vuforia.setFrameFormat(PIXEL_FORMAT.GRAYSCALE, false);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
 
         /*
          * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
@@ -115,7 +163,12 @@ public class VuMarkIdentification extends LinearOpMode {
          * for a competition robot, the front camera might be more convenient.
          */
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.useExtendedTracking = false;
+        parameters.fillCameraMonitorViewParent = true;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        vuforia.setFrameQueueCapacity(10);
+
+        frameQueue = vuforia.getFrameQueue();
 
         /**
          * Load the data set containing the VuMarks for Relic Recovery. There's only one trackable
@@ -126,6 +179,8 @@ public class VuMarkIdentification extends LinearOpMode {
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+
+        openCvInitialized.await();
 
         telemetry.addData(">", "Press Play to start");
         telemetry.update();
@@ -174,6 +229,44 @@ public class VuMarkIdentification extends LinearOpMode {
             }
             else {
                 telemetry.addData("VuMark", "not visible");
+            }
+
+            // Grab frames
+            telemetry.addData("num_frames", frameQueue.size());
+            if (!frameQueue.isEmpty()) {
+                VuforiaLocalizer.CloseableFrame frame = frameQueue.take();
+                Log.i(TAG, "Got frame with " + frame.getNumImages() + " images");
+                for (int i = 0; i < frame.getNumImages(); i++) {
+                    Image image = frame.getImage(i);
+                    Log.i(TAG, "Got image of format: " + image.getFormat());
+                    ByteBuffer byteBuffer = image.getPixels();
+                    if (imgData == null || imgData.length != byteBuffer.capacity()) {
+                        imgData = new byte[byteBuffer.capacity()];
+                    }
+                    byteBuffer.get(imgData);
+                    if (image.getFormat() == PIXEL_FORMAT.RGB565) {
+                        if (raw == null || raw.width() != image.getWidth() || raw.height() != image.getHeight()) {
+                            raw = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC2);
+                        }
+                        raw.put(0, 0, imgData);
+                        Log.i(TAG, "raw is " + raw);
+                        Log.i(TAG, "image is " + image);
+                        rgb = new Mat();
+                        Imgproc.cvtColor(raw, rgb, Imgproc.COLOR_BGR5652BGR);
+
+                        // do things
+
+                        rgb.release();
+                        raw.release();
+                    } else if (image.getFormat() == PIXEL_FORMAT.GRAYSCALE) {
+                        if (raw == null || raw.width() != image.getWidth() || raw.height() != image.getHeight()) {
+                            raw = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8U);
+                        }
+                        raw.put(0, 0, imgData);
+                        Imgcodecs.imwrite(new File(imageSaveLocation, System.currentTimeMillis() + "_" + i + ".jpg").getPath(), raw);
+                    }
+                }
+                frame.close();
             }
 
             telemetry.update();
