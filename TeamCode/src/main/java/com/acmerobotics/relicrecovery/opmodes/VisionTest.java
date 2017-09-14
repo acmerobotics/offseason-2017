@@ -33,8 +33,8 @@ import android.util.Log;
 
 import com.acmerobotics.library.dashboard.MultipleTelemetry;
 import com.acmerobotics.library.dashboard.RobotDashboard;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.vuforia.Image;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
@@ -55,10 +55,11 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
-import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
@@ -67,13 +68,14 @@ import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-@Autonomous(name="VuMark Id", group ="Concept")
-public class VuMarkIdentification extends LinearOpMode {
+@TeleOp
+public class VisionTest extends LinearOpMode {
 
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;
-    private Mat raw, rgb;
+    private Rect cropRect;
+    private Mat raw, rgb, cropped;
     private byte[] imgData;
     private CountDownLatch openCvInitialized = new CountDownLatch(1);
     private File imageSaveLocation;
@@ -180,17 +182,34 @@ public class VuMarkIdentification extends LinearOpMode {
                             imgData = new byte[byteBuffer.capacity()];
                         }
                         byteBuffer.get(imgData);
-                        if (raw == null || raw.width() != image.getWidth() || raw.height() != image.getHeight()) {
-                            raw = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC2);
+                        int imgWidth = image.getWidth(), imgHeight = image.getHeight();
+                        if (raw == null || raw.width() != imgWidth || raw.height() != imgHeight) {
+                            raw = new Mat(imgHeight, imgWidth, CvType.CV_8UC2);
                             rgb = new Mat();
+                            int rectSize = Math.min(imgWidth, imgHeight) / 2;
+                            cropRect = new Rect((imgWidth - rectSize) / 2, (imgHeight - rectSize) / 2, rectSize, rectSize);
                         }
                         raw.put(0, 0, imgData);
                         Imgproc.cvtColor(raw, rgb, Imgproc.COLOR_BGR5652BGR);
 
-                        // do things
-                        MatOfInt params = new MatOfInt();
-                        params.fromArray(Imgcodecs.CV_IMWRITE_JPEG_QUALITY, 100);
-                        Imgcodecs.imwrite(new File(imageSaveLocation, System.currentTimeMillis() + "_" + i + ".jpg").getPath(), rgb, params);
+                        // do simple jewel color analysis
+                        // crop out the center portion of the image
+                        cropped = raw.submat(cropRect);
+                        Scalar totalColor = Core.sumElems(cropped);
+
+                        // TODO assuming BGR ordering
+                        double blue = totalColor.val[0];
+                        double red = totalColor.val[1];
+
+                        // normalize red and blue values
+                        double total = blue + red;
+                        blue /= total;
+                        red /= total;
+
+                        telemetry.addData("blue", blue);
+                        telemetry.addData("red", red);
+
+                        cropped.release();
 
                         rgb.release();
                         raw.release();
